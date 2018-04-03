@@ -1,7 +1,7 @@
-##### TFM: ANÁLISIS DEL IMPACTO DEL CLIMA EN LOS VUELOS #####
+#### TFM: ANÁLISIS DEL IMPACTO DEL CLIMA EN LOS VUELOS ####
 
 
-###### 1. Análisis del dataset de entrada ######
+#### Análisis del dataset de entrada ####
 
 # Los datos de los vuelos se obtienen de: https://www.transtats.bts.gov/Tables.asp?DB_ID=120 tiene datos desde 1987 hasta 2018, actualizándose
 # mensualmente
@@ -22,7 +22,7 @@
 #                       passenger unloading area.  If the parking brake is not set, record the time for the opening of the passenger door.  Also, 
 #                       carriers using a Docking Guidance System (DGS) may record the official gate-arrival time when the aircraft is stopped at the 
 #                       appropriate parking mark.
-# Actual Departure Times:	Gate departure time is the instance when the pilot releases the aircraft parking brake after passengers have loaded and 
+# Actual Departure Times: Gate departure time is the instance when the pilot releases the aircraft parking brake after passengers have loaded and 
 #                         aircraft doors have been closed. In cases where the flight returned to the departure gate before wheels-off time and 
 #                         departed a second time, report the last gate departure time before wheels-off time.  In cases of an air return, report the 
 #                         last gate departure time before the gate return.  If passengers were boarded without the parking brake being set, record 
@@ -30,50 +30,50 @@
 #                         gate-departure time based on aircraft movement.  For example, one DGS records gate departure time when the aircraft moves 
 #                         more than 1 meter from the appropriate parking mark within 15 seconds.  Fifteen seconds is then subtracted from the 
 #                         recorded time to obtain the appropriate out time.
-# Airline ID:	An identification number assigned by US DOT to identify a unique airline (carrier). A unique airline (carrier) is defined as one 
+# Airline ID: An identification number assigned by US DOT to identify a unique airline (carrier). A unique airline (carrier) is defined as one 
 #             holding and reporting under the same DOT certificate regardless of its Code, Name, or holding company/corporation. Use this field for 
 #             analysis across a range of years.
-# Airport Code:	A three character alpha-numeric code issued by the U.S. Department of Transportation which is the official designation of the airport. 
+# Airport Code: A three character alpha-numeric code issued by the U.S. Department of Transportation which is the official designation of the airport. 
 #               The airport code is not always unique to a specific airport because airport codes can change or can be reused.
-# Airport ID:	An identification number assigned by US DOT to identify a unique airport. Use this field for airport analysis across a range of years 
+# Airport ID: An identification number assigned by US DOT to identify a unique airport. Use this field for airport analysis across a range of years 
 #             because an airport can change its airport code and airport codes can be reused.
-# Arrival Delay:	Arrival delay equals the difference of the actual arrival time minus the scheduled arrival time. A flight is considered on-time 
+# Arrival Delay:  Arrival delay equals the difference of the actual arrival time minus the scheduled arrival time. A flight is considered on-time 
 #                 when it arrives less than 15 minutes after its published arrival time.
-# CRS:	Computer Reservation System. CRS provide information on airline schedules, fares and seat availability to travel agencies and allow agents to 
+# CRS:  Computer Reservation System. CRS provide information on airline schedules, fares and seat availability to travel agencies and allow agents to 
 #       book seats and issue tickets.
-# Cancelled Flight:	A flight that was listed in a carrier's computer reservation system during the seven calendar days prior to scheduled departure 
+# Cancelled Flight: A flight that was listed in a carrier's computer reservation system during the seven calendar days prior to scheduled departure 
 #                   but was not operated.
-# Carrier Code:	Code assigned by IATA and commonly used to identify a carrier. As the same code may have been assigned to different carriers over 
+# Carrier Code: Code assigned by IATA and commonly used to identify a carrier. As the same code may have been assigned to different carriers over 
 #               time, the code is not always unique.
-# Certificate Of Public Convenience And Necessity:	A certificate issued to an air carrier under 49 U.S.C. 41102, by the Department of Transportation 
+# Certificate Of Public Convenience And Necessity:  A certificate issued to an air carrier under 49 U.S.C. 41102, by the Department of Transportation 
 #                                                   authorizing the carrier to engage in air transportation.
-# Certificated Air Carrier:	An air carrier holding a Certificate of Public Convenience and Necessity issued by DOT to conduct scheduled services 
+# Certificated Air Carrier: An air carrier holding a Certificate of Public Convenience and Necessity issued by DOT to conduct scheduled services 
 #                           interstate. Nonscheduled or charter operations may also be conducted by these carriers. (same as Certified Air Carrier)
-# Certified Air Carrier:	An air carrier holding a Certificate of Public Convenience and Necessity issued by DOT to conduct scheduled services 
+# Certified Air Carrier:  An air carrier holding a Certificate of Public Convenience and Necessity issued by DOT to conduct scheduled services 
 #                         interstate. Nonscheduled or charter operations may also be conducted by these carriers. (same as Certificated Air Carrier)
-# City Market ID:	An identification number assigned by US DOT to identify a city market. Use this field to consolidate airports serving the same city 
+# City Market ID: An identification number assigned by US DOT to identify a city market. Use this field to consolidate airports serving the same city 
 #                 market.
-# Departure Delay:	The difference between the scheduled departure time and the actual departure time from the origin airport gate.
-# Diverted Flight:	A flight that is required to land at a destination other than the original scheduled destination for reasons beyond the control 
+# Departure Delay:  The difference between the scheduled departure time and the actual departure time from the origin airport gate.
+# Diverted Flight:  A flight that is required to land at a destination other than the original scheduled destination for reasons beyond the control 
 #                   of the pilot/company.
-# Domestic Operations:	All air carrier operations having destinations within the 50 United States, the District of Columbia, the Commonwealth of 
+# Domestic Operations:  All air carrier operations having destinations within the 50 United States, the District of Columbia, the Commonwealth of 
 #                       Puerto Rico, and the U.S. Virgin Islands.
-# Elapsed Time:	The time computed from gate departure time to gate arrival time.
-# FIPS:	Federal Information Processing Standards. Usually referring to a code assigned to any of a variety of geographic entities (e.g. counties, 
+# Elapsed Time: The time computed from gate departure time to gate arrival time.
+# FIPS: Federal Information Processing Standards. Usually referring to a code assigned to any of a variety of geographic entities (e.g. counties, 
 #       states, metropolitan areas, etc). FIPS codes are intended to simplify the collection, processing, and dissemination of data and resources of 
 #       the Federal Government.
-# Flight Number:	A one to four character alpha-numeric code for a particular flight.
-# In-Flight Time:	The total time an aircraft is in the air between an origin-destination airport pair, i.e. from wheels-off at the origin airport to 
+# Flight Number:  A one to four character alpha-numeric code for a particular flight.
+# In-Flight Time: The total time an aircraft is in the air between an origin-destination airport pair, i.e. from wheels-off at the origin airport to 
 #                 wheels-down at the destination airport.
-# Late Flight:	A flight arriving or departing 15 minutes or more after the scheduled time.
-# Passenger Revenues:	Revenues from the air transportation of passengers.
-# Scheduled Departure Time:	The scheduled time that an aircraft should lift off from the origin airport.
-# Scheduled Time Of Arrival:	The scheduled time that an aircraft should cross a certain point (landing or metering fix).
-# Taxi-In Time:	The time elapsed between wheels down and arrival at the destination airport gate.
-# Taxi-Out Time:	The time elapsed between departure from the origin airport gate and wheels off.
-# Unique Carrier:	Unique Carrier Code. It is the Carrier Code most recently used by a carrier. A numeric suffix is used to distinguish duplicate 
+# Late Flight:  A flight arriving or departing 15 minutes or more after the scheduled time.
+# Passenger Revenues: Revenues from the air transportation of passengers.
+# Scheduled Departure Time: The scheduled time that an aircraft should lift off from the origin airport.
+# Scheduled Time Of Arrival:  The scheduled time that an aircraft should cross a certain point (landing or metering fix).
+# Taxi-In Time: The time elapsed between wheels down and arrival at the destination airport gate.
+# Taxi-Out Time:  The time elapsed between departure from the origin airport gate and wheels off.
+# Unique Carrier: Unique Carrier Code. It is the Carrier Code most recently used by a carrier. A numeric suffix is used to distinguish duplicate 
 #                 codes, for example, PA, PA (1), PA (2). Use this field to perform analysis of data reported by one and only one carrier.
-# World Area Code (WAC):	Numeric codes used to identify geopolitical areas such as countries, states (U.S.), provinces (Canada), and territories or 
+# World Area Code (WAC):  Numeric codes used to identify geopolitical areas such as countries, states (U.S.), provinces (Canada), and territories or 
 #                         possessions of certain countries. The codes are used within the various data banks maintained by the Office of Airline 
 #                         Information (OAI) and are created by OAI.
 
@@ -81,10 +81,10 @@
 
 
 # Trabajamos sobre el directorio donde están los datos: "/Users/ellorentesj/Desktop/TFM/MI_TFM"
-vuelos <- read.table("On_Time_On_Time_Performance_2015_1.csv",header=T,sep=',')
+vuelos <- read.table("On_Time_On_Time_Performance_2018_1.csv",header=T,sep=',')
 
 str(vuelos)
-# 'data.frame':	469968 obs. of  110 variables: (int, Factor, num, logi)
+# 'data.frame':	570131 obs. of  110 variables: (int, Factor, num, logi)
 # Year:	                Year
 # Quarter:	            Quarter (1-4)
 # Month:	              Month
@@ -207,9 +207,16 @@ str(vuelos)
 # Div5WheelsOff:      	Wheels Off Time (local time: hhmm) at Diverted Airport Code5
 # Div5TailNum:        	Aircraft Tail Number for Diverted Airport Code5
 
-####### 1.1. Visualización de los datos #######
+##### 1. Visualización de los datos #####
 summary(vuelos)
-# elimino variables que únicamente contienen valores NA's
+
+#### 2. Eliminación de variables que no contienen información ####
+vuelos$Div3Airport <- NULL
+vuelos$Div3AirportID <- NULL
+vuelos$Div3AirportSeqID <- NULL
+vuelos$Div3WheelsOn <- NULL
+vuelos$Div3TotalGTime <- NULL
+vuelos$Div3LongestGTime <- NULL
 vuelos$Div3WheelsOff <- NULL
 vuelos$Div3TailNum <- NULL
 vuelos$Div4Airport <- NULL
@@ -229,3 +236,18 @@ vuelos$Div5LongestGTime <- NULL
 vuelos$Div5WheelsOff <- NULL
 vuelos$Div5TailNum <- NULL
 vuelos$X <- NULL
+
+#### 3. Revisión del resto de variables ####
+# Reducido a 85 variables, de las cuales nos quedamos con:
+# Retrasos mayores de 15 minutos
+vuelosDepDel <- vuelos[vuelos$DepDel15==1,] #116490 registros
+vuelosArrDel <- vuelos[vuelos$ArrDel15==1,] #116392 registros
+# Vuelos cancelados
+vuelosCan <- vuelos[vuelos$Cancelled==1,] #17175 registros
+# Vuelos desviados
+vuelosDiv <- vuelos[vuelos$Diverted==1,] #1255 registros
+
+#### 3.1. Vuelos retrasados ####
+str(vuelosDepDel)
+summary(vuelosDepDel$DepDelay)
+summary(vuelosDepDel$DepDelayMinutes)
