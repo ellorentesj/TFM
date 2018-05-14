@@ -1,32 +1,29 @@
 #### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
-#### 0. PREPROCESAMIENTO DE LOS FICHEROS: Eliminación variables innecesarias ####
+#### 1. PREPROCESAMIENTO DE LOS FICHEROS: Lectura de ficheros y primera limpieza de variables innecesarias ####
+
+list.of.packages <- c("data.table")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
 
 # Selección de ruta, en mi caso: "/Users/ellorentesj/Desktop/TFM/MI_TFM"
-ruta <- getwd()  
-ruta
-if (ruta != "/Users/ellorentesj/Desktop/TFM/MI_TFM") ruta <- "/Users/ellorentesj/Desktop/TFM/MI_TFM"
+setwd("/Users/ellorentesj/Desktop/TFM/MI_TFM")
 
 limpiarFichero <- function (mesFichero){
   
   # Lectura del fichero
-  vueDF <- read.table(mesFichero, header = T, sep = ',')
+  vueDF <- fread(mesFichero, header=T, sep=',')
   
   # Limpieza de los datos no significativos. Se eliminan los datos que no aportan ningún tipo de de información para el análisis de predicción. 
   vueDF$TailNum <- NULL
-  vueDF$CRSDepTime <- NULL
   vueDF$DepartureDelayGroups <- NULL
   vueDF$DepTimeBlk <- NULL
-  vueDF$TaxiOut <- NULL
   vueDF$WheelsOff <- NULL
   vueDF$WheelsOn <- NULL
-  vueDF$TaxiIn <- NULL
-  vueDF$CRSArrTime <- NULL
   vueDF$ArrivalDelayGroups <- NULL
   vueDF$ArrTimeBlk <- NULL
   vueDF$Diverted <- NULL
-  vueDF$CRSElapsedTime <- NULL
-  vueDF$ActualElapsedTime <- NULL
   vueDF$DistanceGroup <- NULL
   vueDF$FirstDepTime <- NULL
   vueDF$TotalAddGTime <- NULL
@@ -76,7 +73,7 @@ limpiarFichero <- function (mesFichero){
   vueDF$Div5LongestGTime <- NULL
   vueDF$Div5WheelsOff <- NULL
   vueDF$Div5TailNum <- NULL
-  vueDF$X <- NULL
+  vueDF$V110 <- NULL
   
   return (vueDF)
 }
@@ -94,6 +91,9 @@ oct = "data/2013/On_Time_On_Time_Performance_2013_10.csv"
 nov = "data/2013/On_Time_On_Time_Performance_2013_11.csv"
 dic = "data/2013/On_Time_On_Time_Performance_2013_12.csv"
 
+# ficCSV <- list.files('data/2013/', pattern = '*.csv', full.names = T)
+# vuelos <- lapply(ficCSV, fread)
+
 # Limpieza del mes de enero para escribirlo en el csv
 enedf <- limpiarFichero(ene)
 write.table(enedf, file = "data/2013/2013.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
@@ -104,4 +104,5 @@ for (i in lismes){
   
   mesdf <- limpiarFichero(i)
   write.table(mesdf, file = "data/2013/2013.csv", append = TRUE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = FALSE)
+  
 }
