@@ -7,8 +7,8 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"
 if(length(new.packages)) install.packages(new.packages)
 
 
-# Selección de ruta, en mi caso: "/Users/ellorentesj/Desktop/TFM/MI_TFM"
-setwd("/Users/ellorentesj/Desktop/TFM/MI_TFM")
+# Selección de ruta donde están los ficheros, en mi caso: "/Users/ellorentesj/Desktop/TFM/data"
+setwd("/Users/ellorentesj/Desktop/TFM/data/")
 
 limpiarFichero <- function (mesFichero){
   
@@ -16,12 +16,14 @@ limpiarFichero <- function (mesFichero){
   vueDF <- fread(mesFichero, header=T, sep=',')
   
   # Limpieza de los datos no significativos. Se eliminan los datos que no aportan ningún tipo de de información para el análisis de predicción. 
-  vuelos$Quarter <- NULL 
+  vueDF$Quarter <- NULL 
   vueDF$TailNum <- NULL
+  vueDF$CRSDepTime <- NULL
   vueDF$DepartureDelayGroups <- NULL
   vueDF$DepTimeBlk <- NULL
   vueDF$WheelsOff <- NULL
   vueDF$WheelsOn <- NULL
+  vueDF$CRSArrTime <- NULL
   vueDF$ArrivalDelayGroups <- NULL
   vueDF$ArrTimeBlk <- NULL
   vueDF$Diverted <- NULL
@@ -79,31 +81,28 @@ limpiarFichero <- function (mesFichero){
   return (vueDF)
 }
 
-ene = "data/2013/On_Time_On_Time_Performance_2013_1.csv"
-feb = "data/2013/On_Time_On_Time_Performance_2013_2.csv"
-mar = "data/2013/On_Time_On_Time_Performance_2013_3.csv"
-abr = "data/2013/On_Time_On_Time_Performance_2013_4.csv"
-may = "data/2013/On_Time_On_Time_Performance_2013_5.csv"
-jun = "data/2013/On_Time_On_Time_Performance_2013_6.csv"
-jul = "data/2013/On_Time_On_Time_Performance_2013_7.csv"
-ago = "data/2013/On_Time_On_Time_Performance_2013_8.csv"
-sep = "data/2013/On_Time_On_Time_Performance_2013_9.csv"
-oct = "data/2013/On_Time_On_Time_Performance_2013_10.csv"
-nov = "data/2013/On_Time_On_Time_Performance_2013_11.csv"
-dic = "data/2013/On_Time_On_Time_Performance_2013_12.csv"
+jun = "On_Time_On_Time_Performance_2013_6.csv"
+jul = "On_Time_On_Time_Performance_2013_7.csv"
+ago = "On_Time_On_Time_Performance_2013_8.csv"
+sep = "On_Time_On_Time_Performance_2013_9.csv"
+oct = "On_Time_On_Time_Performance_2013_10.csv"
+nov = "On_Time_On_Time_Performance_2013_11.csv"
+dic = "On_Time_On_Time_Performance_2013_12.csv"
+ene = "On_Time_On_Time_Performance_2014_1.csv"
+feb = "On_Time_On_Time_Performance_2014_2.csv"
 
 # ficCSV <- list.files('data/2013/', pattern = '*.csv', full.names = T)
 # vuelos <- lapply(ficCSV, fread)
 
-# Limpieza del mes de enero para escribirlo en el csv
-enedf <- limpiarFichero(ene)
-write.table(enedf, file = "data/2013/2013.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
+# Limpieza del mes de Junio para escribirlo en el csv
+enedf <- limpiarFichero(jun)
+write.table(enedf, file = "vuelos.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 
-lismes <- c(feb,mar,abr,may,jun,jul,ago,sep,oct,nov,dic)
+lismes <- c(jul,ago,sep,oct,nov,dic,ene,feb)
 
 for (i in lismes){
   
   mesdf <- limpiarFichero(i)
-  write.table(mesdf, file = "data/2013/2013.csv", append = TRUE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = FALSE)
+  write.table(mesdf, file = "vuelos.csv", append = TRUE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = FALSE)
   
 }
