@@ -2,8 +2,7 @@
 
 #### 1. DATOS DE ENTRADA: Análisis y Exploración del dataset de entrada ####
 
-# Los datos de los vuelos se obtienen de: https://www.transtats.bts.gov/Tables.asp?DB_ID=120 tiene
-# datos desde 1987 hasta 2018, actualizándose mensualmente
+# Los datos de los vuelos se obtienen de: https://www.transtats.bts.gov/Tables.asp?DB_ID=120
 
 
 ##### 1.1. Bloque de carga de librerias #####
@@ -12,47 +11,26 @@ list.of.packages <- c("data.table", "dplyr", "tidyr","lubridate")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
+# *************************************************************************************************
+
 
 ##### 1.2. Bloque de carga de datos #####
 
-# Selección de ruta, en mi caso: "/Users/ellorentesj/Desktop/TFM/MI_TFM"
-setwd("/Users/ellorentesj/Desktop/TFM/MI_TFM")
+# Selección de ruta, en mi caso: "/Users/ellorentesj/Desktop/TFM/"
+setwd("/Users/ellorentesj/Desktop/TFM/")
 
 library(data.table)
 
-# Al tratarse de un fichero con más de 6 millones de registros, he medido los tiempos de lectura de
-# las diferentes funciones y finalmente el menor tiempo de lectura lo realiza la función fread de 
-# data.table:
-# 1. Lectura con read.table de data.table 
-#    timeReadTable <- proc.time()
-#    vuelos <- read.table("data/2013/2013.csv", header=T, sep=',')
-#    proc.time() - timeReadTable
-#    user      system  elapsed 
-#    168.039   19.946  215.736
-# 2. Lectura con fread de data.table
-#    timeReadTable <- proc.time()
-vuelos <- fread("data/2013/2013.csv", header=T, sep=',')
-#    proc.time() - timeReadTable
-#    user     system elapsed 
-#    11.880   3.106  34.972 
-# 3. Lectura con read_csv de readr
-#    timeReadTable <- proc.time()
-#    vuelos <- read_csv("data/2013/2013.csv", col_names = T, progress = T)
-#    proc.time() - timeReadTable
-#    user    system  elapsed 
-#    23.197   5.426  36.355
-# 4. Lectura con read.csv en base R
-#    timeReadTable <- proc.time()
-#    vuelos <- read.csv("data/2013/2013.csv", header=T, sep=',')
-#    proc.time() - timeReadTable
-#    user  system elapsed 
-#    167.924  13.573 185.828 
-class(vuelos)
 
+vuelos <- fread("data/vuelos.csv", header=T, sep=',')
+class(vuelos)
 #weather <- read.table("weather.csv",header=T,sep=',')
+
+# *************************************************************************************************
 
 # Realizo una copia por si tuviese que recuperarla
 dfCompleto <- vuelos
+
 
 ##### 1.3. Bloque de revisión basica del dataset #####
 
@@ -114,13 +92,15 @@ str(vuelos)
 
 summary(vuelos)
 
+# *************************************************************************************************
+
 
 ##### 1.4. Bloque de tratamiento de variables #####
 
 library(dplyr)
 
-#### 1.4.1. Transformación de variables a factor  ####
 
+#### 1.4.1. Transformación de variables a factor  ####
 vuelos$Year = as.factor(vuelos$Year)
 vuelos$Month = as.factor(vuelos$Month) 
 vuelos$DayofMonth = as.factor(vuelos$DayofMonth)
@@ -156,8 +136,7 @@ vuelos$Flights = as.factor(vuelos$Flights)
 # Reviso por si me he dejado alguna variable sin transformar a factor
 summary(vuelos)
 
-dfFactorizado <- vuelos
-#rm(dfFactorizado)
+# dfFactorizado <- vuelos
 
 #### 1.4.2. Transformación de variables a fecha  ####
 
@@ -167,17 +146,12 @@ vuelos$FlightDate = ymd(vuelos$FlightDate)
 str(vuelos$FlightDate)
 
 # Realizo una copia del DF en este momento por si tuviese que volver a recuperarlo
-dfTratadoFD <- vuelos
-
+# dfTratadoFD <- vuelos
 
 #### 1.4.3. Transformación de variables de tipo hora  ####
 
-vuelos$CRSDepTime = format(strptime(vuelos$DepTime, format = "%H%M"), format = "%H:%M")
-str(vuelos$CRSDepTime)
 vuelos$DepTime = format(strptime(vuelos$DepTime, format = "%H%M"), format = "%H:%M")
 str(vuelos$DepTime)
-vuelos$CRSArrTime = format(strptime(vuelos$CRSArrTime, format = "%H%M"), format = "%H:%M")
-str(vuelos$CRSArrTime)
 vuelos$ArrTime = format(strptime(vuelos$ArrTime, format = "%H%M"), format = "%H:%M")
 str(vuelos$ArrTime)
 
@@ -185,115 +159,132 @@ str(vuelos$ArrTime)
 summary(vuelos)
 
 # Realizo una copia del DF por si tuviese que volver a recuperarlo
-dfTratadoFDH <- vuelos
+# dfTratadoFDH <- vuelos
 
 #### 1.4.4. Limpieza de datos no significativos  ####
+
 # Procedo a eliminar los datos que no ofrecen ningún tipo de información para el análisis de la 
 # predicción. Para ello visualizo tanto las variables que tienen campos nulos como los que no 
-vuelos[,colSums(is.na(vuelos))>0]
-#            Year            Quarter              Month         DayofMonth          DayOfWeek         FlightDate      UniqueCarrier          AirlineID 
-#           FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
-#         Carrier          FlightNum    OriginAirportID OriginAirportSeqID OriginCityMarketID             Origin     OriginCityName        OriginState 
-#           FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
-# OriginStateFips    OriginStateName          OriginWac      DestAirportID   DestAirportSeqID   DestCityMarketID               Dest       DestCityName 
-#           FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
-#       DestState      DestStateFips      DestStateName            DestWac         CRSDepTime            DepTime           DepDelay    DepDelayMinutes 
-#           FALSE              FALSE              FALSE              FALSE               TRUE               TRUE               TRUE               TRUE 
-#        DepDel15            TaxiOut             TaxiIn         CRSArrTime            ArrTime           ArrDelay    ArrDelayMinutes           ArrDel15 
-#            TRUE               TRUE               TRUE              FALSE               TRUE               TRUE               TRUE               TRUE 
-#       Cancelled   CancellationCode     CRSElapsedTime  ActualElapsedTime            AirTime            Flights           Distance       CarrierDelay 
-#           FALSE              FALSE               TRUE               TRUE               TRUE              FALSE              FALSE               TRUE 
-#    WeatherDelay           NASDelay      SecurityDelay  LateAircraftDelay 
-#           TRUE                TRUE               TRUE               TRUE
+colSums(is.na(vuelos))>0
+#              Year              Month         DayofMonth          DayOfWeek         FlightDate      UniqueCarrier          AirlineID            Carrier 
+#             FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
+#         FlightNum    OriginAirportID OriginAirportSeqID OriginCityMarketID             Origin     OriginCityName        OriginState    OriginStateFips 
+#             FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
+#   OriginStateName          OriginWac      DestAirportID   DestAirportSeqID   DestCityMarketID               Dest       DestCityName          DestState 
+#             FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
+#     DestStateFips      DestStateName            DestWac            DepTime           DepDelay    DepDelayMinutes           DepDel15            TaxiOut 
+#             FALSE              FALSE              FALSE               TRUE               TRUE               TRUE               TRUE               TRUE 
+#            TaxiIn            ArrTime           ArrDelay    ArrDelayMinutes           ArrDel15          Cancelled   CancellationCode     CRSElapsedTime 
+#              TRUE               TRUE               TRUE               TRUE               TRUE              FALSE              FALSE               TRUE 
+# ActualElapsedTime            AirTime            Flights           Distance       CarrierDelay       WeatherDelay           NASDelay      SecurityDelay 
+#              TRUE               TRUE              FALSE              FALSE               TRUE               TRUE               TRUE               TRUE 
+# LateAircraftDelay 
+#              TRUE 
 # Los variables que contienen campos TRUE, informan que hay filas nulas(NA), las cuales no 
 # contienen ningún tipo de información.
 
-# Elimino los registros relacionados con la hora programada de despegue (CRSDepTime) que no contienen 
-# ningún tipo de información, es decir, son campos vacíos que corresponden a vuelos 
-# cancelados. Estos no son de utilidad para analizar y predecir los retrasos en los vuelos puesto
-# que son operaciones no realizadas. Un vuelo está cancelado cuando en su campo indica un 1, y un 0
-# cuando el vuelo no ha sido cancelado
+### DEPTIME ###
 vuelos %>% 
-  filter(is.na(CRSDepTime), Cancelled == 1) %>% 
-  nrow() # [1] 91681
-
+  filter(is.na(DepTime)) %>% 
+  nrow() # [1] 103522
+# Elimino los registros relacionados con la hora de despegue (DepTime) que no contienen ningún 
+# tipo de información, es decir, son campos vacíos que corresponden a vuelos cancelados. Estos no 
+# son de utilidad para analizar y predecir los retrasos en los vuelos puesto que son operaciones no
+# realizadas. Un vuelo está cancelado cuando en su campo indica un 1, y un 0 cuando el vuelo no ha
+# sido cancelado
+vuelos %>% 
+  filter(is.na(DepTime), Cancelled == 1) %>% 
+  nrow() # [1] 103522
 # Guardo los vuelos cancelados en un dataframe aparte
-Cancelados <- vuelos %>% filter(is.na(CRSDepTime))
-
+Cancelados <- vuelos %>% filter(is.na(DepTime))
 # Elimino del dataframe vuelos los vuelos cancelados
 library(tidyr)
 vuelos <- vuelos %>% 
-  drop_na(CRSDepTime)
+  drop_na(DepTime)
+#..................................................................................................
 
+### CANCELLED & CANCELLATIONCODE ###
 # Respectivamente si un vuelo no ha sido cancelado, el campo Cancellation_Code estará vacío, es 
 # decir, no contrendrá un código informativo, con lo cual el campo será nulo. Por tanto, podemos 
 # prescindir de las variables Cancelled y CancellationCode
 vuelos$Cancelled <- NULL
 vuelos$CancellationCode <- NULL
+#..................................................................................................
 
 # Hacemos una copia del dataframe sin los cancelados
-dfSinCan <- vuelos
+# dfSinCan <- vuelos
 
 # Vuelvo a visualizar las variables con campos nulos
-vuelos[,colSums(is.na(vuelos))>0]
-#              Year            Quarter              Month         DayofMonth          DayOfWeek         FlightDate      UniqueCarrier 
-#             FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
-#         AirlineID            Carrier          FlightNum    OriginAirportID OriginAirportSeqID OriginCityMarketID             Origin 
-#             FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
-#    OriginCityName        OriginState    OriginStateFips    OriginStateName          OriginWac      DestAirportID   DestAirportSeqID 
-#             FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
-#  DestCityMarketID               Dest       DestCityName          DestState      DestStateFips      DestStateName            DestWac 
-#             FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
-#        CRSDepTime            DepTime           DepDelay    DepDelayMinutes           DepDel15            TaxiOut             TaxiIn 
-#             FALSE              FALSE              FALSE              FALSE              FALSE               TRUE               TRUE 
-#        CRSArrTime            ArrTime           ArrDelay    ArrDelayMinutes           ArrDel15     CRSElapsedTime  ActualElapsedTime 
-#             FALSE               TRUE               TRUE               TRUE               TRUE               TRUE               TRUE 
-#           AirTime            Flights           Distance       CarrierDelay       WeatherDelay           NASDelay      SecurityDelay 
-#              TRUE              FALSE              FALSE               TRUE               TRUE               TRUE               TRUE 
-# LateAircraftDelay 
-#              TRUE
-# El siguiente objetivo es la variable nula ArrTime tenga un valor temporal y que las 
-# campos nulos de las variables ArrDelay, ArrDelayMinutes y ArrDel15 tengan valor o valor 0,
-# en función del valor que se cumplimente en ArrTime.
-# Como no conocemos la hora estimada de llegada del vuelo, suponemos que llegó en hora, para los
-# campos NA de ArrTime copiamos el valor que tiene en CRSArrTime, que es la hora programada de
-# llegada del vuelo. 
-vuelos <- vuelos %>%
-  mutate(ArrTime = coalesce(ArrTime, CRSArrTime))
-vuelos %>% 
-  filter(is.na(ArrTime)) %>% 
-  nrow() # [1] 0
-# Para la variable ArrDelay deberíamos calcular su valor, restandole los tiempos ArrTime-CRSArrTime
-# pero como no vamos a hacer uso de estas variables para tener en cuenta para el retraso de la 
-# salida en el origen, los eliminamos del dataset (Revisar)
-# vuelos %>% 
-#   filter(is.na(ArrDelay)) %>% 
-#   nrow() # [1] 18491
-# # Casi está, para que calcule bien los cambios de día, es necesario tener en cuenta también la 
-# # fecha de FlightsDate
-# vuelos %>% 
-#   filter(is.na(ArrDelay)) %>% 
-#   mutate(ArrDelay = coalesce(hour(hm(ArrTime) - hm(CRSArrTime))*60+minute(hm(ArrTime) - hm(CRSArrTime)))) %>% 
-#   View()
-# vuelos <- vuelos %>%
-#   mutate(ArrDelay = coalesce(ArrDelay, -ArrTime))
-# vuelos <- vuelos %>%
-#   mutate(ArrDelayMinutes = coalesce(ArrDelayMinutes, 0L))
-# vuelos <- vuelos %>%
-#   mutate(ArrDel15 = coalesce(ArrDel15, 0L))
+colSums(is.na(vuelos))>0
+#            Year              Month         DayofMonth          DayOfWeek         FlightDate      UniqueCarrier          AirlineID            Carrier 
+#           FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
+#       FlightNum    OriginAirportID OriginAirportSeqID OriginCityMarketID             Origin     OriginCityName        OriginState    OriginStateFips 
+#           FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
+# OriginStateName          OriginWac      DestAirportID   DestAirportSeqID   DestCityMarketID               Dest       DestCityName          DestState 
+#           FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE 
+#   DestStateFips      DestStateName            DestWac            DepTime           DepDelay    DepDelayMinutes           DepDel15            TaxiOut 
+#           FALSE              FALSE              FALSE              FALSE              FALSE              FALSE              FALSE               TRUE 
+#          TaxiIn            ArrTime           ArrDelay    ArrDelayMinutes           ArrDel15     CRSElapsedTime  ActualElapsedTime            AirTime 
+#            TRUE               TRUE               TRUE               TRUE               TRUE               TRUE               TRUE               TRUE 
+#         Flights           Distance       CarrierDelay       WeatherDelay           NASDelay      SecurityDelay  LateAircraftDelay 
+#           FALSE              FALSE               TRUE               TRUE               TRUE               TRUE               TRUE
 
-# El último paso es que los campos nulos de las variables CarrierDelay, WeatherDelay, NASDelay, 
-# SecurityDelay y LateAircraftDelay tengan valor 0
+### ARRDELAY, ARRDELAYMINUTES, ARRDEL15, CARRIERDELAY, WEATHERDELAY, NASDELAY, SECURITYDELAY, LATEAIRCRAFTDELAY ###
+vuelos %>% 
+  filter(is.na(ArrDelay)) %>% 
+  nrow() # [1] 14941
+vuelos %>% 
+  filter(is.na(ArrDelayMinutes)) %>% 
+  nrow() # [1] 14941
+vuelos %>% 
+  filter(is.na(ArrDel15)) %>% 
+  nrow() # [1] 14941
+vuelos %>% 
+  filter(is.na(CarrierDelay)) %>% 
+  nrow() # [1] 3551290
+vuelos %>% 
+  filter(is.na(WeatherDelay)) %>% 
+  nrow() # [1] 3551290
+vuelos %>% 
+  filter(is.na(NASDelay)) %>% 
+  nrow() # [1] 3551290
+vuelos %>% 
+  filter(is.na(SecurityDelay)) %>% 
+  nrow() # [1] 3551290
+vuelos %>% 
+  filter(is.na(LateAircraftDelay)) %>% 
+  nrow() # [1] 3551290
+# El siguiente objetivo es hacer que las variables ArrDelay, ArrDelayMinutes, ArrDel15, 
+# CarrierDelay, WeatherDelay, NASDelay, SecurityDelay, LateAircraftDelay que contienen campos
+# nulos, es hacer que contengan algún tipo de información ya que se requieren para poder analizar
+# los retrasos en los vuelos. Se procede a cambiar los campos nulos(NA) de estas variables por 
+# valores con el número 0.
 vuelos <- vuelos %>% 
-  mutate(CarrierDelay = coalesce(CarrierDelay, 0L))
+  mutate(ArrDelay = coalesce(ArrDelay,0L))
 vuelos <- vuelos %>% 
-  mutate(WeatherDelay = coalesce(WeatherDelay, 0L))
+  mutate(ArrDelayMinutes = coalesce(ArrDelayMinutes,0L))
 vuelos <- vuelos %>% 
-  mutate(NASDelay = coalesce(NASDelay, 0L))
+  mutate(ArrDel15 = coalesce(ArrDel15,0L))
 vuelos <- vuelos %>% 
-  mutate(SecurityDelay = coalesce(SecurityDelay, 0L))
+  mutate(CarrierDelay = coalesce(CarrierDelay,0L))
 vuelos <- vuelos %>% 
-  mutate(LateAircraftDelay = coalesce(LateAircraftDelay, 0L))
+  mutate(WeatherDelay = coalesce(WeatherDelay,0L))
+vuelos <- vuelos %>% 
+  mutate(NASDelay = coalesce(NASDelay,0L))
+vuelos <- vuelos %>% 
+  mutate(SecurityDelay = coalesce(SecurityDelay,0L))
+vuelos <- vuelos %>% 
+  mutate(LateAircraftDelay = coalesce(LateAircraftDelay,0L))
+#..................................................................................................
+
+### ARRDELAY ###
+# Sustituyo los valores que contiene el campo CarrierDelay por los valores que contiene el campo 
+# ArrDelay únicamente en las filas donde la suma de las variables de los campos con retraso den 0 y
+# el valor de ArrDelay sea mayor que 0
+vuelos %>% 
+  filter(ArrDelay > 0, (CarrierDelay + WeatherDelay + NASDelay + SecurityDelay + LateAircraftDelay) == 0) %>% 
+  View()
+# *************************************************************************************************
 
 # Top 3 de aeropuertos que tienen más vuelos retrasados
 vuelos %>% 
