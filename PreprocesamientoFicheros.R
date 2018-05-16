@@ -16,6 +16,7 @@ limpiarFichero <- function (mesFichero){
   vueDF <- fread(mesFichero, header=T, sep=',')
   
   # Limpieza de los datos no significativos. Se eliminan los datos que no aportan ningún tipo de de información para el análisis de predicción. 
+  vuelos$Quarter <- NULL 
   vueDF$TailNum <- NULL
   vueDF$DepartureDelayGroups <- NULL
   vueDF$DepTimeBlk <- NULL
