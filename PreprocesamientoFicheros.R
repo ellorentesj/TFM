@@ -95,8 +95,8 @@ feb = "On_Time_On_Time_Performance_2014_2.csv"
 # vuelos <- lapply(ficCSV, fread)
 
 # Limpieza del mes de Junio para escribirlo en el csv
-enedf <- limpiarFichero(jun)
-write.table(enedf, file = "vuelos.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
+jundf <- limpiarFichero(jun)
+write.table(jundf, file = "vuelos.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 
 lismes <- c(jul,ago,sep,oct,nov,dic,ene,feb)
 
