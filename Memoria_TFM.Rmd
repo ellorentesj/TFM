@@ -24,24 +24,24 @@ cuenta que para que se contabilice un retraso en una categoría causal, este ret
 sido mayor a 15 minutos.
 
 Para la creación del caso de estudio se utilizan los datos históricos del Departamento de 
-Transporte de los Estados Unidos (US DOT), obtenido de https://www.transtats.bts.gov/Tables.asp?DB_ID=120
+Transporte de los Estados Unidos (US DOT), obtenido de https://www.transtats.bts.gov/DL_SelectFields.asp
 
 ## 2. Análisis y exploración del dataset de entrada
 
-Se ha descargado datos para los meses de Diciembre del 2013 a Julio de 2014 por tener el mayor
-porcentaje de retrasos y se han juntado bajo el nombre de fichero "vuelos.csv". Se ha realizado una
-limpieza previa de estos ficheros con el archivo PreprocesamientoFicheros.R, puesto que el fichero 
-tenía muchas variables que únicamente contenían NAs y por tanto se podía prescindir de ellas.
+Se han descargado datos para los meses de Diciembre del 2013 y Enero de 2014 por tener el mayor
+porcentaje de retrasos. La misma página de US DOT muestra el porcentaje de valor que falta de cada 
+una de las variables (este porcentaje lo realiza sobre la tabla completa). Se han eliminado tanto 
+aquellas variables que tenían un >99.99 de perdida de información, puesto que indica que es una 
+variable sin datos válidos, tanto como aquellas que no aportan ningún tipo de información para el 
+análisis.
 
 ```{r dataset, echo=FALSE}
 setwd("/Users/ellorentesj/repostGitHub/TFM/data/") 
-vuelos <- fread("vuelos.csv", header=T, sep=',')
+flights <- fread("flights.csv", header=T, sep=',')
 ```
 
-El dataset está compuesto por 988688 campos y 39 variables, que comprenden tipos int y chr.
-
 ```{r summary}
-str(vuelos)
+str(flights)
 ```
 
 Para poder realizar análisis de los datos, es necesario formatearlos
