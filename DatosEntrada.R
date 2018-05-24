@@ -1,12 +1,10 @@
 #### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
-#### 1. DATOS DE ENTRADA: Análisis y Exploración del dataset de entrada ####
-
-# Los datos de los vuelos se obtienen de: https://www.transtats.bts.gov/Tables.asp?DB_ID=120
+#### 2. DATOS DE ENTRADA: Análisis y Exploración del dataset de entrada ####
 
 
 # *************************************************************************************************
-##### 1.1. Bloque de carga de librerias #####
+##### 2.1. Bloque de carga de librerias #####
 
 list.of.packages <- c("data.table", "dplyr", "tidyr","lubridate")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -21,90 +19,85 @@ library(tidyr)
 
 
 # *************************************************************************************************
-##### 1.2. Bloque de carga de datos #####
+##### 2.2. Bloque de carga de datos #####
 
 # Selección de ruta, en mi caso: "/Users/ellorentesj/repostGitHub/TFM/data/"
 setwd("/Users/ellorentesj/repostGitHub/TFM/data/")
 
-vuelos <- fread("vuelos.csv", header=T, sep=',')
-class(vuelos) # [1] "data.table" "data.frame"
+#flights <- fread("flights.csv", header=T, sep=',')
+class(flights) 
 # *************************************************************************************************
 
 # Realizo una copia por si tuviese que recuperarla
 # dfCompleto <- vuelos
 
 # *************************************************************************************************
-##### 1.3. Bloque de revisión basica del dataset #####
-str(vuelos)
-summary(vuelos)
+##### 2.3. Bloque de revisión basica del dataset #####
+str(flights)
+summary(flights)
 # *************************************************************************************************
 
 
 # *************************************************************************************************
-##### 1.4. Bloque de tratamiento de variables #####
+##### 2.4. Bloque de tratamiento de variables #####
 
-#### 1.4.1. Transformación de variables a factor  ####
-vuelos$Year = as.factor(vuelos$Year)
-vuelos$Month = as.factor(vuelos$Month) 
-vuelos$DayofMonth = as.factor(vuelos$DayofMonth)
-vuelos$DayOfWeek = as.factor(vuelos$DayOfWeek)
-vuelos$UniqueCarrier = as.factor(vuelos$UniqueCarrier)
-vuelos$AirlineID = as.factor(vuelos$AirlineID)
-vuelos$Carrier = as.factor(vuelos$Carrier)
-vuelos$FlightNum = as.factor(vuelos$FlightNum)
-vuelos$OriginAirportID = as.factor(vuelos$OriginAirportID)
-vuelos$OriginAirportSeqID = as.factor(vuelos$OriginAirportSeqID)
-vuelos$OriginCityMarketID = as.factor(vuelos$OriginCityMarketID)
-vuelos$Origin = as.factor(vuelos$Origin)
-vuelos$OriginCityName = as.factor(vuelos$OriginCityName)
-vuelos$OriginState = as.factor(vuelos$OriginState)
-vuelos$DestAirportID = as.factor(vuelos$DestAirportID)
-vuelos$DestAirportSeqID = as.factor(vuelos$DestAirportSeqID)
-vuelos$DestCityMarketID = as.factor(vuelos$DestCityMarketID)
-vuelos$Dest = as.factor(vuelos$Dest)
-vuelos$DestCityName = as.factor(vuelos$DestCityName)
-vuelos$DestState = as.factor(vuelos$DestState)
-vuelos$DepDel15 = as.factor(vuelos$DepDel15)
-vuelos$ArrDel15 = as.factor(vuelos$ArrDel15)
-vuelos$Cancelled = as.factor(vuelos$Cancelled)
-vuelos$CancellationCode = as.factor(vuelos$CancellationCode)
-# vuelos$Flights = as.factor(vuelos$Flights)
+#### 2.4.1. Transformación de variables a factor  ####
+flights$UniqueCarrier = as.factor(flights$UniqueCarrier)
+flights$AirlineID = as.factor(flights$AirlineID)
+flights$Carrier = as.factor(flights$Carrier)
+flights$FlightNum = as.factor(flights$FlightNum)
+flights$OriginAirportID = as.factor(flights$OriginAirportID)
+flights$OriginAirportSeqID = as.factor(flights$OriginAirportSeqID)
+flights$OriginCityMarketID = as.factor(flights$OriginCityMarketID)
+flights$Origin = as.factor(flights$Origin)
+flights$OriginCityName = as.factor(flights$OriginCityName)
+flights$OriginState = as.factor(flights$OriginState)
+flights$DestAirportID = as.factor(flights$DestAirportID)
+flights$DestAirportSeqID = as.factor(flights$DestAirportSeqID)
+flights$DestCityMarketID = as.factor(flights$DestCityMarketID)
+flights$Dest = as.factor(flights$Dest)
+flights$DestCityName = as.factor(flights$DestCityName)
+flights$DestState = as.factor(flights$DestState)
+flights$DepDel15 = as.factor(flights$DepDel15)
+flights$ArrDel15 = as.factor(flights$ArrDel15)
+flights$Cancelled = as.factor(flights$Cancelled)
+flights$CancellationCode = as.factor(flights$CancellationCode)
 
 # Reviso por si me he dejado alguna variable sin transformar a factor
-summary(vuelos)
+summary(flights)
 
-# Realizo una copia del dataset
-# dfFactorizado <- vuelos
+#### 2.4.2. Transformación de variables a fecha  ####
+flights$FlightDate = ymd(flights$FlightDate)
 
-#### 1.4.2. Transformación de variables a fecha  ####
+#### 2.4.3. Transformación de variables de tipo hora  ####
+flights$DepTime = format(strptime(flights$DepTime, format = "%H%M"), format = "%H:%M")
+flights$ArrTime = format(strptime(flights$ArrTime, format = "%H%M"), format = "%H:%M")
 
-vuelos$FlightDate = ymd(vuelos$FlightDate)
-str(vuelos$FlightDate)
-
-# Realizo una copia del DF en este momento por si tuviese que volver a recuperarlo
-# dfTratadoFD <- vuelos
-
-#### 1.4.3. Transformación de variables de tipo hora  ####
-
-vuelos$DepTime = format(strptime(vuelos$DepTime, format = "%H%M"), format = "%H:%M")
-str(vuelos$DepTime)
-vuelos$ArrTime = format(strptime(vuelos$ArrTime, format = "%H%M"), format = "%H:%M")
-str(vuelos$ArrTime)
+#### 2.4.4. Transformación de variables de tipo integer  ####
+flights$DepDelay = as.integer(flights$DepDelay)
+flights$DepDelayMinutes = as.integer(flights$DepDelayMinutes)
+flights$TaxiOut = as.integer(flights$TaxiOut)
+flights$TaxiIn = as.integer(flights$TaxiIn)
+flights$ArrDelay = as.integer(flights$ArrDelay)
+flights$ArrDelayMinutes = as.integer(flights$ArrDelayMinutes)
+flights$AirTime = as.integer(flights$AirTime)
+flights$Distance = as.integer(flights$Distance)
+flights$CarrierDelay = as.integer(flights$CarrierDelay)
+flights$WeatherDelay = as.integer(flights$WeatherDelay)
+flights$NASDelay = as.integer(flights$NASDelay)
+flights$SecurityDelay = as.integer(flights$SecurityDelay)
+flights$LateAircraftDelay = as.integer(flights$LateAircraftDelay)
 
 # Reviso por si me he dejado alguna variable sin transformar
-summary(vuelos)
+str(flights)
 
-# Realizo una copia del DF por si tuviese que volver a recuperarlo
-# dfTratadoFDH <- vuelos
-
-#### 1.4.4. Limpieza de datos no significativos  ####
-
+#### 2.4.4. Limpieza de datos no significativos  ####
 # Procedo a eliminar los datos que no ofrecen ningún tipo de información para el análisis de la 
 # predicción. Para ello visualizo tanto las variables que tienen campos nulos como los que no 
-colSums(is.na(vuelos))>0
+colSums(is.na(flights))>0
 
 ### DEPTIME ###
-vuelos %>% 
+flights %>% 
   filter(is.na(DepTime)) %>% 
   nrow() # [1] 44553
 # Elimino los registros relacionados con la hora de despegue (DepTime) que no contienen ningún 
@@ -112,13 +105,13 @@ vuelos %>%
 # son de utilidad para analizar y predecir los retrasos en los vuelos puesto que son operaciones no
 # realizadas. Un vuelo está cancelado cuando en su campo indica un 1, y un 0 cuando el vuelo no ha
 # sido cancelado
-vuelos %>% 
+flights %>% 
   filter(is.na(DepTime), Cancelled == 1) %>% 
   nrow() # [1] 44553
 # Guardo los vuelos cancelados en un dataframe aparte
-Cancelados <- vuelos %>% filter(is.na(DepTime))
+canceled <- flights %>% filter(is.na(DepTime))
 # Elimino del dataframe vuelos los vuelos cancelados
-vuelos <- vuelos %>% 
+flights <- flights %>% 
   drop_na(DepTime)
 ### DEPTIME ###
 
@@ -126,45 +119,45 @@ vuelos <- vuelos %>%
 # Respectivamente si un vuelo no ha sido cancelado, el campo Cancellation_Code estará vacío, es 
 # decir, no contrendrá un código informativo, con lo cual el campo será nulo. Por tanto, podemos 
 # prescindir de las variables Cancelled y CancellationCode
-vuelos$Cancelled <- NULL
-vuelos$CancellationCode <- NULL
+flights$Cancelled <- NULL
+flights$CancellationCode <- NULL
 ### CANCELLED & CANCELLATIONCODE ###
 
-colSums(is.na(vuelos))>0
+colSums(is.na(flights))>0
 
 # Hacemos una copia del dataframe sin los cancelados
 # dfSinCan <- vuelos
 
 ### TAXIOUT, TAXIIN, ARRDELAY, ARRDELAYMINUTES, ARRDEL15, CARRIERDELAY, WEATHERDELAY, NASDELAY, 
 # SECURITYDELAY, LATEAIRCRAFTDELAY ###
-vuelos %>% 
+flights %>% 
   filter(is.na(TaxiOut)) %>% 
   nrow() # [1] 723
-vuelos %>% 
+flights %>% 
   filter(is.na(TaxiIn)) %>% 
   nrow() # [1] 1984
-vuelos %>% 
+flights %>% 
   filter(is.na(ArrDelay)) %>% 
   nrow() # [1] 3679
-vuelos %>% 
+flights %>% 
   filter(is.na(ArrDelayMinutes)) %>% 
   nrow() # [1] 3679
-vuelos %>% 
+flights %>% 
   filter(is.na(ArrDel15)) %>% 
   nrow() # [1] 3679
-vuelos %>% 
+flights %>% 
   filter(is.na(CarrierDelay)) %>% 
   nrow() # [1] 679183
-vuelos %>% 
+flights %>% 
   filter(is.na(WeatherDelay)) %>% 
   nrow() # [1] 679183
-vuelos %>% 
+flights %>% 
   filter(is.na(NASDelay)) %>% 
   nrow() # [1] 679183
-vuelos %>% 
+flights %>% 
   filter(is.na(SecurityDelay)) %>% 
   nrow() # [1] 679183
-vuelos %>% 
+flights %>% 
   filter(is.na(LateAircraftDelay)) %>% 
   nrow() # [1] 679183
 # El siguiente objetivo es hacer que las variables TaxiOut, TaxiIn, ArrDelay, ArrDelayMinutes, 
@@ -172,31 +165,28 @@ vuelos %>%
 # SecurityDelay, LateAircraftDelay que contienen campos nulos, es hacer que contengan algún tipo de
 # información ya que se requieren para poder analizar los retrasos en los vuelos. Se procede a 
 # cambiar los campos nulos(NA) de estas variables por valores con el número 0.
-vuelos <- vuelos %>% 
-  mutate(TaxiOut = coalesce(TaxiOut,0L))
-vuelos <- vuelos %>% 
-  mutate(TaxiIn = coalesce(TaxiIn,0L))
-vuelos <- vuelos %>% 
-  mutate(ArrDelay = coalesce(ArrDelay,0L))
-vuelos <- vuelos %>% 
-  mutate(ArrDelayMinutes = coalesce(ArrDelayMinutes,0L))
-vuelos <- vuelos %>% 
-  mutate(ArrDel15 = coalesce(ArrDel15,0L))
-vuelos <- vuelos %>%
-  mutate(CarrierDelay = coalesce(CarrierDelay,0L))
-vuelos <- vuelos %>% 
-  mutate(WeatherDelay = coalesce(WeatherDelay,0L))
-vuelos <- vuelos %>% 
-  mutate(NASDelay = coalesce(NASDelay,0L))
-vuelos <- vuelos %>% 
-  mutate(SecurityDelay = coalesce(SecurityDelay,0L))
-vuelos <- vuelos %>% 
-  mutate(LateAircraftDelay = coalesce(LateAircraftDelay,0L))
+flights <- flights %>% 
+  mutate(TaxiOut = coalesce(as.integer(TaxiOut),0L))
+flights <- flights %>% 
+  mutate(TaxiIn = coalesce(as.integer(TaxiIn),0L))
+flights <- flights %>% 
+  mutate(ArrDelay = coalesce(as.integer(ArrDelay),0L))
+flights <- flights %>% 
+  mutate(ArrDelayMinutes = coalesce(as.integer(ArrDelayMinutes),0L))
+flights <- flights %>% 
+  mutate(ArrDel15 = coalesce(as.integer(ArrDel15),0L))
+flights <- flights %>%
+  mutate(CarrierDelay = coalesce(as.integer(CarrierDelay),0L))
+flights <- flights %>% 
+  mutate(WeatherDelay = coalesce(as.integer(WeatherDelay),0L))
+flights <- flights %>% 
+  mutate(NASDelay = coalesce(as.integer(NASDelay),0L))
+flights <- flights %>% 
+  mutate(SecurityDelay = coalesce(as.integer(SecurityDelay),0L))
+flights <- flights %>% 
+  mutate(LateAircraftDelay = coalesce(as.integer(LateAircraftDelay),0L))
 ### TAXIOUT, TAXIIN, ARRDELAY, ARRDELAYMINUTES, ARRDEL15, CARRIERDELAY, WEATHERDELAY, NASDELAY, 
 # SECURITYDELAY, LATEAIRCRAFTDELAY ###
-
-# Realizo copia 
-# dfCasiLimpio <- vuelos
 
 ### ARRDELAY ###
 # Sustituyo los valores que contiene el campo CarrierDelay por los valores que contiene el campo 
@@ -208,40 +198,39 @@ vuelos <- vuelos %>%
 # a su destino con retraso.
 # Con esto se consigue saber correctamente si el vuelo realizado ha llegado a su destino con algún
 # tipo de retraso o ha llegado puntual.
-vuelos %>% 
+flights %>% 
   filter(ArrDelay>0, (CarrierDelay + WeatherDelay + NASDelay + SecurityDelay + LateAircraftDelay) == 0) %>% 
   nrow() # [1] 195719
 # Añado una columna donde se sumen las variables con retraso 
-totalDelay <- vuelos$CarrierDelay+vuelos$WeatherDelay+vuelos$NASDelay+vuelos$SecurityDelay+vuelos$LateAircraftDelay
+totalDelay <- flights$CarrierDelay+flights$WeatherDelay+flights$NASDelay+flights$SecurityDelay+flights$LateAircraftDelay
 # La añaado al dataset
-vuelos <- cbind(vuelos, totalDelay)
+flights <- cbind(flights, totalDelay)
 # Modifico los CarrierDelay donde ArrDelay > 0 & (CarrierDelay + WeatherDelay + NASDelay + SecurityDelay + LateAircraftDelay) == 0
-vuelos[vuelos$ArrDelay>0 & vuelos$totalDelay==0,"CarrierDelay"] <- vuelos[vuelos$ArrDelay>0 & vuelos$totalDelay == 0, "ArrDelay"]
+flights[flights$ArrDelay>0 & flights$totalDelay==0,"CarrierDelay"] <- flights[flights$ArrDelay>0 & flights$totalDelay == 0, "ArrDelay"]
+rm(totalDelay)
 ### ARRDELAY ###
 
-### ARRTIME ###
-vuelos %>% 
-  filter(is.na(ArrTime)) %>% 
-  nrow() # [1] 1984
-# Se podría intentar calcular la hora de llegada por el número de vuelo y el destino, pero hay que
-# tener en cuenta el tiempo de vueloy el cambio de hora, como tampoco tenemos la información de 
-# estos retrasos, asignamos a estos vuelos por defecto las "00:00"
-vuelos <- vuelos %>% 
-  mutate(ArrTime = coalesce(ArrTime,"00:00"))
-### ARRTIME ###
+### AIRTIME ###
+flights %>% 
+  filter(is.na(AirTime)) %>% 
+  nrow() # [1] 3679
+# Es necesario eliminar estos vuelos puesto que no sabemos el tiempo de vuelo haste el destino
+flights <- flights %>% 
+  drop_na(AirTime)
+### AIRTIME ###
 
 # Reviso que no quede ninguna variable más por limpiar
-colSums(is.na(vuelos))>0
+colSums(is.na(flights))>0
 # *************************************************************************************************
 
 # Guardo el dataset
-write.table(vuelos, file = "VuelosFinales.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
+write.table(flights, file = "finalFlights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 
 # Top 3 de aeropuertos que tienen más vuelos retrasados, 
-vuelos %>% 
+flights %>% 
   group_by(Origin) %>% 
-  summarise(totalDel15 = sum(DepDel15==1), ProRetDel = (sum(DepDel15==1)/nrow(vuelos))*100, totalArrDel15 = sum(ArrDel15==1),
-            ProRetArr = (sum(ArrDel15==1)/nrow(vuelos)*100)) %>% 
+  summarise(totalDel15 = sum(DepDel15==1), ProRetDel = (sum(DepDel15==1)/nrow(flights))*100, totalArrDel15 = sum(ArrDel15==1),
+            ProRetArr = (sum(ArrDel15==1)/nrow(flights)*100)) %>% 
   arrange(-totalArrDel15) %>% 
   top_n(3)
 #   Origin totalDel15 ProRetDel totalArrDel15  ProRetArr
