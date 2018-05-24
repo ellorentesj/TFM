@@ -132,13 +132,12 @@ $(document).ready(function () {
 <h2>1. Introducción</h2>
 <p>El objetivo de este TFM no es más que el de aplicar las distintas técnicas aprendidas en el V-Master de Data Science con el fin de analizar y predecir el retraso en los vuelos comerciales.</p>
 <p>Los retrasos se puede agrupar en 2 categorías (Aerolínea + Turnaround local, Tiempo Extremo, Aeronaves que llegan tarde o retraso reaccionario, Seguridad y Sistema ATM), siempre teniendo en cuenta que para que se contabilice un retraso en una categoría causal, este retraso ha de haber sido mayor a 15 minutos.</p>
-<p>Para la creación del caso de estudio se utilizan los datos históricos del Departamento de Transporte de los Estados Unidos (US DOT), obtenido de <a href="https://www.transtats.bts.gov/Tables.asp?DB_ID=120" class="uri">https://www.transtats.bts.gov/Tables.asp?DB_ID=120</a></p>
+<p>Para la creación del caso de estudio se utilizan los datos históricos del Departamento de Transporte de los Estados Unidos (US DOT), obtenido de <a href="https://www.transtats.bts.gov/DL_SelectFields.asp" class="uri">https://www.transtats.bts.gov/DL_SelectFields.asp</a></p>
 </div>
 <div id="analisis-y-exploracion-del-dataset-de-entrada" class="section level2">
 <h2>2. Análisis y exploración del dataset de entrada</h2>
-<p>Se ha descargado datos para los meses de Diciembre del 2013 a Julio de 2014 por tener el mayor porcentaje de retrasos y se han juntado bajo el nombre de fichero “vuelos.csv”. Se ha realizado una limpieza previa de estos ficheros con el archivo PreprocesamientoFicheros.R, puesto que el fichero tenía muchas variables que únicamente contenían NAs y por tanto se podía prescindir de ellas.</p>
-<p>El dataset está compuesto por 988688 campos y 39 variables, que comprenden tipos int y chr.</p>
-<pre class="r"><code>str(vuelos)</code></pre>
+<p>Se han descargado datos para los meses de Diciembre del 2013 y Enero de 2014 por tener el mayor porcentaje de retrasos. La misma página de US DOT muestra el porcentaje de valor que falta de cada una de las variables (este porcentaje lo realiza sobre la tabla completa). Se han eliminado tanto aquellas variables que tenían un &gt;99.99 de perdida de información, puesto que indica que es una variable sin datos válidos, tanto como aquellas que no aportan ningún tipo de información para el análisis.</p>
+<pre class="r"><code>str(flights)</code></pre>
 <pre><code>## Classes 'data.table' and 'data.frame':   988688 obs. of  39 variables:
 ##  $ Year              : int  2013 2013 2013 2013 2013 2013 2013 2013 2013 2013 ...
 ##  $ Month             : int  12 12 12 12 12 12 12 12 12 12 ...
