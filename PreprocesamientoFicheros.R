@@ -4,6 +4,8 @@
 
 # Los datos de los vuelos se obtienen de: https://www.transtats.bts.gov/DL_SelectFields.asp
 
+# *************************************************************************************************
+##### 1.1. Bloque de carga de librerias #####
 list.of.packages <- c("data.table","utils","dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
@@ -11,8 +13,14 @@ if(length(new.packages)) install.packages(new.packages)
 library(data.table)
 library(utils)
 library(dplyr)
+# *************************************************************************************************
 
-# Selección de ruta donde están los ficheros, en mi caso: "/Users/ellorentesj/repostGitHub/TFM"
+
+# *************************************************************************************************
+##### 1.2. Bloque de carga de datos #####
+# ¡CUIDADO! Es necesario modificar la ruta por la correspondiente en el equipo donde se vaya a 
+# ejecutar el código para su correcto funcionamiento
+# Selección de ruta donde están los ficheros, en mi caso: "/Users/ellorentesj/repostGitHub/TFM/data/"
 setwd("/Users/ellorentesj/repostGitHub/TFM/data/")
 
 # Declaro variables 'tempDec' y 'tempJan' como archivos temporeales
@@ -36,7 +44,11 @@ rm(tempDec)
 rm(tempJan)
 
 flightsAux <- rbind(dfDecember,dfJanuary)
+# *************************************************************************************************
 
+
+# *************************************************************************************************
+##### 1.3. Bloque de limpieza de datos #####
 # Limpieza del dataset, elimino las variables que tienen >99.99 perdida de información, puesto que
 # esto indica que es una variable sin datos válidos. Y elimino los datos no significativos que no 
 # aportan ningún tipo de información para el análisis.
@@ -117,8 +129,10 @@ clenEmptyData <- function (dfFlightsAux){
 }
 
 flights <- clenEmptyData(flightsAux)
+# *************************************************************************************************
 
-write.table(flights, file = "flights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
+
+# write.table(flights, file = "flights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 
 # Elimino los datos no necesarios
 rm(dfDecember)
