@@ -46,7 +46,8 @@ ggplot(flights, aes(x = flights$Dest)) + geom_bar(fill = "blue") +
 ggplot(flights, aes(x = flights$Carrier, y = flights$DepDelayMinutes)) + 
   geom_bar(fill = "blue")
 
-
+# *************************************************************************************************
+##### 2.3. Bloque de modelización #####
 # ¿Hay relación entre los minutos de retraso en la salida y los minutos de retraso de llegada
 # al destino?
 # plot(flights$DepDelayMinutes,flights$ArrDelayMinutes, main = "Diagrama de dispersión", 
@@ -97,11 +98,56 @@ plot(modelo1)
 
 
 # ¿Un vuelo de llegada se puede retrasar si sale con retraso?
-ggplot(flights, aes(x = flights$DepDelayMinutes, y = flights$ArrDel15)) + geom_point() + 
+ggplot(flights, aes(x = flights$Carrier, y = flights$ArrDelayMinutes)) + geom_point() + 
   geom_smooth(method = "lm", se=TRUE, color="red", formula = y ~ x)
-modelo2 = lm(flights$ArrDel15~flights$DepDelayMinutes + flights$Distance + flights$AirTime +
-               flights$DepTime, data = flights)
+
+modelo2 = lm(flights$ArrDelayMinutes~flights$Carrier, data = flights)
 summary(modelo2)
 
 # *************************************************************************************************
+
+
+# Hay retraso?
+flightsAux <- flights %>% 
+  sample_n(100000)
+
+set.seed(101) # Set Seed so that same sample can be reproduced in future also
+# Now Selecting 75% of data as sample from total 'n' rows of the data  
+sample <- sample.int(n = nrow(flightsAux), size = floor(.80*nrow(flightsAux)), replace = F)
+train <- flightsAux[sample, ]
+test  <- flightsAux[-sample, ]
+
+mologit = glm(ArrDel15~DayofMonth+DayOfWeek+Origin+Dest+Distance+UniqueCarrier+DepTimeBlk,family=binomial(link='logit'),data=train)
+summary(mologit)
+
+require(caret)
+library(caret)
+# https://stackoverflow.com/questions/46028360/confusionmatrix-for-logistic-regression-in-r
+# Use your model to make predictions, in this example newdata = training set, but replace with your test set    
+pdata <- predict(mologit, newdata = test, type = "response")
+
+# use caret and compute a confusion matrix
+confusionMatrix(data = as.numeric(pdata>0.5), reference = test$ArrDel15)
+
+# *************************************************************************************************
+# Estimación tiempo retraso en la llegada
+flightsAux <- flights %>% 
+  sample_n(100000)
+
+# https://stackoverflow.com/questions/17200114/how-to-split-data-into-training-testing-sets-using-sample-function
+set.seed(101) # Set Seed so that same sample can be reproduced in future also
+# Now Selecting 75% of data as sample from total 'n' rows of the data  
+sample <- sample.int(n = nrow(flightsAux), size = floor(.80*nrow(flightsAux)), replace = F)
+train <- flightsAux[sample, ]
+test  <- flightsAux[-sample, ]
+
+moli = lm(ArrDelay~DayofMonth+DayOfWeek+Origin+Dest+Distance+UniqueCarrier+DepTimeBlk, data = train)
+summary(moli)
+predict.lm(moli,test)
+
+mape <- mean(abs((predict.lm(moli,test) - test$ArrDelay))/test$ArrDelay)  
+mape
+
+# *************************************************************************************************
+
 
