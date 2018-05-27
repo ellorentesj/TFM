@@ -1,7 +1,7 @@
 #### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
 
-#### 1. PREPROCESAMIENTO DE LOS FICHEROS: Lectura de ficheros, limpieza, análisis y tratamiento de datos ####
+#### 1. PREPROCESAMIENTO DE LOS FICHEROS: Lectura de ficheros. Limpieza, análisis y tratamiento de datos ####
 
 
 # Los datos de los vuelos se obtienen de: https://www.transtats.bts.gov/DL_SelectFields.asp
