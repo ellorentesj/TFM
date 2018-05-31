@@ -1,7 +1,9 @@
 #### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
 
+
 #### 1. PREPROCESAMIENTO DE LOS FICHEROS: Lectura de ficheros. Limpieza, análisis y tratamiento de datos ####
+
 
 
 # Los datos de los vuelos se obtienen de: https://www.transtats.bts.gov/DL_SelectFields.asp
@@ -46,8 +48,8 @@ tempJan = "data/On_Time_On_Time_Performance_2014_1.zip"
 tempFeb = "data/On_Time_On_Time_Performance_2014_2.zip"
 
 # Utilizo la función unzip para extraer los archivos CSV
-unzip(tempJan,"data/On_Time_On_Time_Performance_2014_1.csv")
-unzip(tempFeb, "data/On_Time_On_Time_Performance_2014_2.csv")
+unzip(tempJan,"On_Time_On_Time_Performance_2014_1.csv")
+unzip(tempFeb, "On_Time_On_Time_Performance_2014_2.csv")
 
 # Introduzco los datos de los CSV en dataframes
 dfJanuary <- fread("data/On_Time_On_Time_Performance_2014_1.csv", header=T, sep=',')
@@ -66,7 +68,7 @@ str(flightsAux)
 summary(flightsAux)
 
 # Porcentaje de información inexistente
-percent <- as.double((colSums(is.na(flightsAux))/nrow(flightsAux)))
+percent <- as.double((colSums(is.na(flightsAux))/nrow(flightsAux))*100)
 names <- colnames(flightsAux)
 df <- data.frame(names)
 df$percent <- percent
@@ -75,11 +77,11 @@ ggplot(df, aes(x = df$names, y = df$percent)) + geom_col(fill="blue") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   labs(x = "Names", y = "Percentage", title = "Information loss percent")
 # Visualización de los datos >= 99%
-df %>% filter(percent >= 99) %>% arrange(percent) %>% View()
+df %>% filter(percent>=99) %>% arrange(percent) %>% View()
 
 # Limpieza del dataset, elimino las variables que tienen >99 % perdida de información, puesto que
 # esto indica que es una variable sin datos válidos.
-clenEmptyData <- function (dfFlightsAux){
+cleanEmptyData <- function (dfFlightsAux){
   
   dfFlightsAux$TotalAddGTime <- NULL # 99.34585% de pérdida de información
   dfFlightsAux$LongestAddGTime <- NULL # 99.34585% de pérdida de información
@@ -126,8 +128,8 @@ tail(flights)
 summary(flights)
 
 # Dentro de los vuelos operados, existen vuelos cancelados y desviados
-flights %>% filter(Cancelled==1) %>% nrow() # 45599 vuelos cancelados
-flights %>% filter(Diverted==1) %>% nrow() # 2633 vuelos desviados
+flights %>% filter(Cancelled==1) %>% nrow() # 54571 vuelos cancelados
+flights %>% filter(Diverted==1) %>% nrow() # 2619 vuelos desviados
 
 ##### 1.4.1. Análisis de los vuelos cancelados #####
 # Los vuelos cancelados no son de utilidad para analizar y predecir los retrasos en los vuelos 
@@ -835,21 +837,22 @@ flights$FirstDepTime <- NULL
 
 # *************************************************************************************************
 #### 1.6. Guardo el dataframe resultante de un análisis, limpieza y tratamiento previo ####
-write.table(flights, file = "flights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
+write.table(flights, file = "data/flights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 # *************************************************************************************************
 
 
 
 # *************************************************************************************************
 #### 1.7. Elimino referencias innecesarias #####
+rm(df)
+rm(dfFebruary)
+rm(dfJanuary)
+rm(flightsAux)
+rm(names)
+rm(percent)
 rm(tempJan)
 rm(tempFeb)
-rm(dfJanuary)
-rm(dfFebruary)
-rm(flightsAux)
-rm(df)
-rm(names)
-rm(porcentaje)
+rm(clenEmptyData)
 # *************************************************************************************************
 
 
