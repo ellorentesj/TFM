@@ -1,6 +1,6 @@
 #### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
-#### 2. ANÁLISIS VISUAL DE LOS DATOS: Visualización ####
+#### 2. ANÁLISIS VISUAL DE LOS DATOS: Análisis de las gráficas de Tableau ####
 
 # *************************************************************************************************
 ##### 2.1. Bloque de carga de librerias #####
