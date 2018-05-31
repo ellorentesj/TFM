@@ -1,6 +1,6 @@
 #### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
-#### 3. DATOS DE ENTRADA: Análisisa y Normalización de los datos de entrada ####
+#### 3. DATOS DE ENTRADA: Análisis y Normalización de los datos de entrada ####
 
 
 # *************************************************************************************************
