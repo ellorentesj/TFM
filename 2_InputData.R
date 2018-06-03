@@ -389,7 +389,7 @@ rm(TimeRoute)
 #### 2.9. Guardo el dataframe resultante de la normalización ####
 # Guardo el dataset totalmente normalizado
 flightsWeights <- flights
-write.table(flightsWeights, file = "flightsWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
+write.table(flightsWeights, file = "data/flightsWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 # *************************************************************************************************
 
 
