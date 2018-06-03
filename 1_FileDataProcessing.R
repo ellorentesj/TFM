@@ -114,7 +114,7 @@ cleanEmptyData <- function (dfFlightsAux){
   return (dfFlightsAux)
 }
 
-flights <- clenEmptyData(flightsAux)
+flights <- cleanEmptyData(flightsAux)
 # *************************************************************************************************
 
 
@@ -265,7 +265,7 @@ flights$AirlineID <- NULL
 str(flights$Carrier)
 # Esta variable contiene el código asignado por la IATA comúnmente utilizado para identiticar una 
 # compañía. Como el mismo código puede haber sido asignado a diferentes operadores a lo largo del 
-# tiempo. el código no siempre es único. La página de US DOT indica que para el análisis, se use 
+# tiempo, el código no siempre es único. La página de US DOT indica que para el análisis, se use 
 # el Código único de operador (Unique Carrier Code).
 # Lo transformo en factor:
 flights$Carrier <- as.factor(flights$Carrier)
@@ -295,8 +295,7 @@ flights$FlightNum <- as.factor(flights$FlightNum)
 summary(flights$FlightNum) 
 str(flights$FlightNum) # 6338 levels
 # Compruebo si tiene NA's
-flights %>% filter(is.na(FlightNum)) %>% nrow()
-# la variable no contiene ningún NA
+flights %>% filter(is.na(FlightNum)) %>% nrow() # la variable no contiene ningún NA
 
 
 ##### 1.5.3. Origin #####
@@ -312,8 +311,7 @@ flights$OriginAirportID <- as.factor(flights$OriginAirportID)
 summary(flights$OriginAirportID)
 str(flights$OriginAirportID) # 301 levels
 # Compruebo si tiene NA's 
-flights %>% filter(is.na(OriginAirportID)) %>% nrow()
-# La variable no contiene ningún NA
+flights %>% filter(is.na(OriginAirportID)) %>% nrow() # La variable no contiene ningún NA
 
 ##### 1.5.3.2. OriginAirportSeqID #####
 str(flights$OriginAirportSeqID)
@@ -326,8 +324,7 @@ flights$OriginAirportSeqID <- as.factor(flights$OriginAirportSeqID)
 summary(flights$OriginAirportSeqID)
 str(flights$OriginAirportSeqID) # 305 levels
 # Compruebo si tiene NA's 
-flights %>% filter(is.na(OriginAirportSeqID)) %>% nrow()
-# La variable no contiene ningún NA
+flights %>% filter(is.na(OriginAirportSeqID)) %>% nrow() # La variable no contiene ningún NA
 
 ##### 1.5.3.3. OriginCityMarketID #####
 str(flights$OriginCityMarketID)
@@ -339,8 +336,7 @@ flights$OriginCityMarketID <- as.factor(flights$OriginCityMarketID)
 summary(flights$OriginCityMarketID)
 str(flights$OriginCityMarketID) # 280 levels
 # Compruebo si tiene NA's 
-flights %>% filter(is.na(OriginCityMarketID)) %>% nrow()
-# La variable no contiene ningún NA
+flights %>% filter(is.na(OriginCityMarketID)) %>% nrow() # La variable no contiene ningún NA
 
 ##### 1.5.3.4. Origin #####
 str(flights$Origin)
@@ -484,8 +480,7 @@ flights$DestCityName <- as.factor(flights$DestCityName)
 summary(flights$DestCityName)
 str(flights$DestCityName) # 297 levels
 # Compruebo si tiene NA's
-flights %>% filter(is.na(DestCityName)) %>% nrow()
-# la variable no contiene ningún NA
+flights %>% filter(is.na(DestCityName)) %>% nrow() # la variable no contiene ningún NA
 
 ##### 1.5.4.6. DestState #####	
 str(flights$DestState)
@@ -825,10 +820,11 @@ flights %>% filter(is.na(LateAircraftDelay)) %>% nrow() # la variable contiene 3
 str(flights$FirstDepTime)
 # Esta variable contiene el retraso acumulado o reaccionario de la aeronave en minutos.
 summary(flights$FirstDepTime)
+flights$FirstDepTime <- as.integer(flights$FirstDepTime)
 # Compruebo si tiene NA's
-flights %>% filter(FirstDepTime=="") %>% nrow() # la variable contiene 840187 NA's
+flights %>% filter(is.na(FirstDepTime)) %>% nrow() # la variable contiene 840187 NA's
 # Miro qué porcentaje de pérdida de información tiene esta variable:
-flights %>% filter(FirstDepTime=="") %>% nrow()/nrow(flights)*100
+flights %>% filter(is.na(FirstDepTime)) %>% nrow()/nrow(flights)*100
 # Esta variable tienen una pérdida de información del 99.38795% >99%, la elimino del dataset
 flights$FirstDepTime <- NULL
 # *************************************************************************************************
@@ -837,7 +833,8 @@ flights$FirstDepTime <- NULL
 
 # *************************************************************************************************
 #### 1.6. Guardo el dataframe resultante de un análisis, limpieza y tratamiento previo ####
-write.table(flights, file = "data/flights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
+flightsFileDataProcesing <- flights
+write.table(flightsFileDataProcesing, file = "data/flights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 # *************************************************************************************************
 
 
@@ -852,7 +849,8 @@ rm(names)
 rm(percent)
 rm(tempJan)
 rm(tempFeb)
-rm(clenEmptyData)
+rm(cleanEmptyData)
 # *************************************************************************************************
+
 
 
