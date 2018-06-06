@@ -8,6 +8,8 @@ A la hora de analizar y clasificar la causa de los retrasos, en términos genera
 Los datos se han obtenido del Departamento de Transporte de los Estados Unidos (US DOT).
 
 #### Herramientas utilizadas
-RStudio (Version 1.1.419)
+R (Versión 3.5)
+
+RStudio (Version 1.1)
 
 Tableau Desktop 2018.1
