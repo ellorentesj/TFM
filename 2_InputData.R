@@ -16,7 +16,7 @@
 # *************************************************************************************************
 ##### 2.2. Bloque de carga de datos #####
 # Selección de ruta, en mi caso: "/Users/ellorentesj/repostGitHub/TFM/data/"
-setwd("/Users/ellorentesj/repostGitHub/TFM/")
+# setwd("/Users/ellorentesj/repostGitHub/TFM/")
 # flights <- fread("flights.csv", header=T, sep=',')
 # *************************************************************************************************
 
