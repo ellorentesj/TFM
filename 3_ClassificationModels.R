@@ -18,9 +18,13 @@ if(!require("randomForest")){
   install.packages("randomForest")
   library(randomForest)
 }
-if(!require("dplyr")){
-  install.packages("dplyr")
-  library(dplyr)
+if(!require("e1071")){
+  install.packages("e1071")
+  library(e1071)
+} # rescale
+if(!require("scales")){
+  install.packages("scales")
+  library(scales)
 }
 # *************************************************************************************************
 
@@ -118,24 +122,18 @@ flights$DestState <- inner_join(flights, DestStateWeights, by = "DestState")$Des
 
 
 #### 3.2.13. DepTime ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-DepTimeWeights <- flights %>% group_by(DepTime) %>% summarise(DepTimeW = mean(ArrDel15==1))
-# Realizo un join en la columna DepTime del dataset flights con los pesos calculados en DepTimeWeights
-flights$DepTime <- inner_join(flights, DepTimeWeights, by = "DepTime")$DepTimeW
+# Normalizo DepTime
+flights$DepTime <- rescale(flights$DepTime)
 
 
 #### 3.2.14. DepDelay ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-DepDelayWeights <- flights %>% group_by(DepDelay) %>% summarise(DepDelayW = mean(ArrDel15==1))
-# Realizo un join en la columna DepDelay del dataset flights con los pesos calculados en DepDelayWeights
-flights$DepDelay <- inner_join(flights, DepDelayWeights, by = "DepDelay")$DepDelayW
+# Normalizo DepTime
+flights$DepDelay <- rescale(flights$DepDelay)
 
 
 #### 3.2.15. DepDelayMinutes ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-DepDelayMinutesWeights <- flights %>% group_by(DepDelayMinutes) %>% summarise(DepDelayMinutesW = mean(ArrDel15==1))
-# Realizo un join en la columna DepDelayMinutes del dataset flights con los pesos calculados en DepDelayMinutesWeights
-flights$DepDelayMinutes <- inner_join(flights, DepDelayMinutesWeights, by = "DepDelayMinutes")$DepDelayMinutesW
+# Normalizo DepDelayMinutes
+flights$DepDelayMinutes <- rescale(flights$DepDelayMinutes)
 
 
 #### 3.2.16. DepDel15 ####
@@ -160,24 +158,18 @@ flights$DepTimeBlk <- inner_join(flights, DepTimeBlkWeights, by = "DepTimeBlk")$
 
 
 #### 3.2.19. ArrTime ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-ArrTimeWeights <- flights %>% group_by(ArrTime) %>% summarise(ArrTimeW = mean(ArrDel15==1))
-# Realizo un join en la columna ArrTime del dataset flights con los pesos calculados en ArrTimeWeights
-flights$ArrTime <- inner_join(flights, ArrTimeWeights, by = "ArrTime")$ArrTimeW
+# Normalizo ArrTime
+flights$ArrTime <- rescale(flights$ArrTime)
 
 
 #### 3.2.20. ArrDelay ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-ArrDelayWeights <- flights %>% group_by(ArrDelay) %>% summarise(ArrDelayW = mean(ArrDel15==1))
-# Realizo un join en la columna ArrDelay del dataset flights con los pesos calculados en ArrDelayWeights
-flights$ArrDelay <- inner_join(flights, ArrDelayWeights, by = "ArrDelay")$ArrDelayW
+# Normalizo ArrDelay
+flights$ArrDelay <- rescale(flights$ArrDelay)
 
 
 #### 3.2.21. ArrDelayMinutes ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-ArrDelayMinutesWeights <- flights %>% group_by(ArrDelayMinutes) %>% summarise(ArrDelayMinutesW = mean(ArrDel15==1))
-# Realizo un join en la columna ArrDelayMinutes del dataset flights con los pesos calculados en ArrDelayMinutesWeights
-flights$ArrDelayMinutes <- inner_join(flights, ArrDelayMinutesWeights, by = "ArrDelayMinutes")$ArrDelayMinutesW
+# Normalizo ArrDelayMinutes
+flights$ArrDelayMinutes <- rescale(flights$ArrDelayMinutes)
 
 #### 3.2.22. ArrivalDelayGroups ####
 # Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
@@ -194,17 +186,13 @@ flights$ArrTimeBlk <- inner_join(flights, ArrTimeBlkWeights, by = "ArrTimeBlk")$
 
 
 #### 3.2.24. ActualElapsedTime ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-ActualElapsedTimeWeights <- flights %>% group_by(ActualElapsedTime) %>% summarise(ActualElapsedTimeW = mean(ArrDel15==1))
-# Realizo un join en la columna ActualElapsedTime del dataset flights con los pesos calculados en ActualElapsedTimeWeights
-flights$ActualElapsedTime <- inner_join(flights, ActualElapsedTimeWeights, by = "ActualElapsedTime")$ActualElapsedTimeW
+# Normalizo ActualElapsedTime
+flights$ActualElapsedTime <- rescale(flights$ActualElapsedTime)
 
 
 #### 3.2.25. Distance ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-DistanceWeights <- flights %>% group_by(Distance) %>% summarise(DistanceW = mean(ArrDel15==1))
-# Realizo un join en la columna Distance del dataset flights con los pesos calculados en DistanceWeights
-flights$Distance <- inner_join(flights, DistanceWeights, by = "Distance")$DistanceW
+# Normalizo Distance
+flights$Distance <- rescale(flights$Distance)
 
 
 #### 3.2.26. DistanceGroup ####
@@ -215,38 +203,28 @@ flights$DistanceGroup <- inner_join(flights, DistanceGroupWeights, by = "Distanc
 
 
 #### 3.2.27. CarrierDelay ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-CarrierDelayWeights <- flights %>% group_by(CarrierDelay) %>% summarise(CarrierDelayW = mean(ArrDel15==1))
-# Realizo un join en la columna CarrierDelay del dataset flights con los pesos calculados en CarrierDelayWeights
-flights$CarrierDelay <- inner_join(flights, CarrierDelayWeights, by = "CarrierDelay")$CarrierDelayW
+# Normalizo CarrierDelay
+flights$CarrierDelay <- rescale(flights$CarrierDelay)
 
 
 #### 3.2.28. WeatherDelay ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-WeatherDelayWeights <- flights %>% group_by(WeatherDelay) %>% summarise(WeatherDelayW = mean(ArrDel15==1))
-# Realizo un join en la columna WeatherDelay del dataset flights con los pesos calculados en WeatherDelayWeights
-flights$WeatherDelay <- inner_join(flights, WeatherDelayWeights, by = "WeatherDelay")$WeatherDelayW
+# Normalizo WeatherDelay
+flights$WeatherDelay <- rescale(flights$WeatherDelay)
 
 
 #### 3.2.29. NASDelay ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-NASDelayWeights <- flights %>% group_by(NASDelay) %>% summarise(NASDelayW = mean(ArrDel15==1))
-# Realizo un join en la columna NASDelay del dataset flights con los pesos calculados en NASDelayWeights
-flights$NASDelay <- inner_join(flights, NASDelayWeights, by = "NASDelay")$NASDelayW
+# Normalizo NASDelay
+flights$NASDelay <- rescale(flights$NASDelay)
 
 
 #### 3.2.30. SecurityDelay ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-SecurityDelayWeights <- flights %>% group_by(SecurityDelay) %>% summarise(SecurityDelayW = mean(ArrDel15==1))
-# Realizo un join en la columna SecurityDelay del dataset flights con los pesos calculados en SecurityDelayWeights
-flights$SecurityDelay <- inner_join(flights, SecurityDelayWeights, by = "SecurityDelay")$SecurityDelayW
+# Normalizo SecurityDelay
+flights$SecurityDelay <- rescale(flights$SecurityDelay)
 
 
 #### 3.2.31. LateAircraftDelay ####
-# Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
-LateAircraftDelayWeights <- flights %>% group_by(LateAircraftDelay) %>% summarise(LateAircraftDelayW = mean(ArrDel15==1))
-# Realizo un join en la columna LateAircraftDelay del dataset flights con los pesos calculados en LateAircraftDelayWeights
-flights$LateAircraftDelay <- inner_join(flights, LateAircraftDelayWeights, by = "LateAircraftDelay")$LateAircraftDelayW
+# Normalizo LateAircraftDelay
+flights$LateAircraftDelay <- rescale(flights$LateAircraftDelay)
 # *************************************************************************************************
 
 
@@ -277,62 +255,36 @@ write.table(OriginStateWeights, file = "CategoriesWeights/OriginStateWeights.csv
 write.table(DestAirportSeqIDWeights, file = "CategoriesWeights/DestAirportSeqIDWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(DestWeights, file = "CategoriesWeights/DestWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(DestStateWeights, file = "CategoriesWeights/DestStateWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(DepTimeWeights, file = "CategoriesWeights/DepTimeWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(DepDelayWeights, file = "CategoriesWeights/DepDelayWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(DepDelayMinutesWeights, file = "CategoriesWeights/DepDelayMinutesWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(DepDel15Weights, file = "CategoriesWeights/DepDel15Weights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(DepartureDelayGroupsWeights, file = "CategoriesWeights/DepartureDelayGroupsWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(DepTimeBlkWeights, file = "CategoriesWeights/DepTimeBlkWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(ArrTimeWeights, file = "CategoriesWeights/ArrTimeWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(ArrDelayWeights, file = "CategoriesWeights/ArrDelayWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(ArrDelayMinutesWeights, file = "CategoriesWeights/ArrDelayMinutesWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(ArrivalDelayGroupsWeights, file = "CategoriesWeights/ArrivalDelayGroupsWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(ArrTimeBlkWeights, file = "CategoriesWeights/ArrTimeBlkWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(ActualElapsedTimeWeights, file = "CategoriesWeights/ActualElapsedTimeWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(DistanceWeights, file = "CategoriesWeights/DistanceWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 write.table(DistanceGroupWeights, file = "CategoriesWeights/DistanceGroupWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(CarrierDelayWeights, file = "CategoriesWeights/CarrierDelayWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(WeatherDelayWeights, file = "CategoriesWeights/WeatherDelayWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(NASDelayWeights, file = "CategoriesWeights/NASDelayWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(SecurityDelayWeights, file = "CategoriesWeights/SecurityDelayWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-write.table(LateAircraftDelayWeights, file = "CategoriesWeights/LateAircraftDelayWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
 # *************************************************************************************************
 
 
 
 # *************************************************************************************************
 #### 3.5. Elimino variables categóricas ####
-rm(ActualElapsedTimeWeights)
-rm(ArrDelayMinutesWeights)
-rm(ArrDelayWeights)
 rm(ArrivalDelayGroupsWeights)
 rm(ArrTimeBlkWeights)
-rm(ArrTimeWeights)
-rm(CarrierDelayWeights)
 rm(DayofMonthWeights)
 rm(DayOfWeekWeights)
 rm(DepartureDelayGroupsWeights)
 rm(DepDel15Weights)
-rm(DepDelayMinutesWeights)
-rm(DepDelayWeights)
 rm(DepTimeBlkWeights)
-rm(DepTimeWeights)
 rm(DestAirportSeqIDWeights)
 rm(DestStateWeights)
 rm(DestWeights)
 rm(DistanceGroupWeights)
-rm(DistanceWeights)
 rm(FlightNumWeights)
-rm(LateAircraftDelayWeights)
 rm(MonthWeights)
-rm(NASDelayWeights)
 rm(OriginAirportSeqIDWeights)
 rm(OriginStateWeights)
 rm(OriginWeights)
-rm(SecurityDelayWeights)
 rm(TailNumWeights)
 rm(UniqueCarrierWeights)
-rm(WeatherDelayWeights)
 # *************************************************************************************************
 
 
@@ -375,7 +327,6 @@ testClassification  <- flightsWeights[-sampleClassification, ] # Conjunto de tes
 # Realizo un modelo con todas las características con Regresión Logística, para visualizar las
 # características que más influyen en el modelo:
 modLRClassiComplete = glm(ArrDel15~., family=binomial(link='logit'), data = trainClassification)
-summary(modLRClassiComplete)
 # Voy a ver la importancia de cada característica en el modelo:
 varImpModLRClassiComplete <- varImp(modLRClassiComplete)
 overall <- as.double(varImpModLRClassiComplete$Overall)
@@ -387,7 +338,7 @@ ggplot(df, aes(x = df$names, y = df$overall)) + geom_col(fill="blue") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   labs(x = "Names", y = "Overall", title = "Importance of features using Logistic Regression")
 # Parece que la característica que más influye para que un vuelo se retrase o no según el modelo
-# de Regresión Logística es ArrDelay
+# de Regresión Logística es ArrivalDelayGroups
 # Tiene sentido por que es justo la característica que contiene retraso en la llegada, por tanto, se 
 # debe de prescindir de las variables que dan el retraso de la llegada de alguna manera para la 
 # realización del modelo.
@@ -445,21 +396,21 @@ arrange(df, desc(df$overall))
 ggplot(df, aes(x = df$names, y = df$overall)) + geom_col(fill="blue") + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   labs(x = "Names", y = "Overall", title = "Importance of features using Logistic Regression")
-# Para el Modelo 2 voy a usar: DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+
-#                              OriginState+DepTimeBlk+DepTime/+Dest
+# Para el Modelo 2 voy a usar: DayofMonth+FlightNum+UniqueCarrier+TailNum+DepDelay+DayOfWeek+
+#                              OriginState+DepTime/+DestAirportSeqID+DistanceGroup
 # Predicción
 predictionLRClassi1 <- round(predict(modLRClassi1, newdata = testClassification, type = "response"))
 # Matriz de confusión
 confusionMatrix(data = as.factor(predictionLRClassi1), reference = testClassification$ArrDel15)
 #           Reference
 # Prediction      0      1
-#          0 121406  11917
-#          1   3323  32427
+#          0 120952  11551
+#          1   3777  32793
 # Precisión/Recall
 precisionLRClassi1 <- posPredValue(as.factor(predictionLRClassi1), testClassification$ArrDel15, positive="1")
 recallLRClassi1 <- sensitivity(as.factor(predictionLRClassi1), testClassification$ArrDel15, positive="1")
 c(precisionLRClassi1,recallLRClassi1)
-# [1] 0.9070490 0.7312601
+# [1] 0.8967186 0.7395138
 # Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 73%.
 # Almaceno los valores para compararlos con el resto:
 name <- "LogisticRegressionClassificationModel1"
@@ -484,20 +435,21 @@ arrange(df, desc(df$meanDecreaseGini))
 ggplot(df, aes(x = df$names, y = df$meanDecreaseGini)) + geom_col(fill="blue") + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   labs(x = "Names", y = "MeanDecreaseGini", title = "Importance of features using Random Forest")
-# Para el Modelo 3 voy a usar: DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+Dest+
-#                              Origin
+# Para el Modelo 3 voy a usar: DepDelayMinutes+TailNum+DepTime+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
+#                              Origin+DestAirportSeqID
+# Predicción                             
 predictionRFClassi1 <- predict(modRFClassi1, newdata = testClassification)
 # Matriz de confusión
 confusionMatrix(data = as.factor(predictionRFClassi1), reference = testClassification$ArrDel15)
 #           Reference
 # Prediction      0      1
-#          0 120774  11119
-#          1   3955  33225
+#          0 120839  11130
+#          1   3890  33214
 # Precisión/Recall 
 precisionRFClassi1 <- posPredValue(as.factor(predictionRFClassi1), testClassification$ArrDel15, positive="1")
 recallRFClassi1 <- sensitivity(as.factor(predictionRFClassi1), testClassification$ArrDel15, positive="1")
 c(precisionRFClassi1,recallRFClassi1)
-# [1] 0.8936256 0.7492558
+# [1] 0.8951596 0.7490078
 # Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso casi el 75%.
 # Guardo los resultados en el metricsPreRec
 name <- "RandomForestClassificationModel1"
@@ -509,12 +461,12 @@ metricsPreRec <- rbind(metricsPreRec,df)
 
 ##### 3.6.3. Modelo 2 #####
 
-# ClassificationModel2: DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
-#                       DepTimeBlk
+# ClassificationModel2: DayofMonth+FlightNum+UniqueCarrier+TailNum+DepDelay+DayOfWeek+OriginState+
+#                       DepTime+DestAirportSeqID+DistanceGroup
 
 ##### 3.6.3.1. Regresión Logística #####
-modLRClassi2 <- glm(ArrDel15~DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
-                      DepTimeBlk, family=binomial(link='logit'), data = trainClassification)
+modLRClassi2 <- glm(ArrDel15~DayofMonth+FlightNum+UniqueCarrier+TailNum+DepDelay+DayOfWeek+OriginState+
+                      DepTime+DestAirportSeqID+DistanceGroup, family=binomial(link='logit'), data = trainClassification)
 summary(modLRClassi2)
 # Predicción
 predictionLRClassi2 <- round(predict(modLRClassi2, newdata = testClassification, type = "response"))
@@ -522,51 +474,51 @@ predictionLRClassi2 <- round(predict(modLRClassi2, newdata = testClassification,
 confusionMatrix(data = as.factor(predictionLRClassi2), reference = testClassification$ArrDel15)
 #           Reference
 # Prediction     0     1
-#          0 116990   9287
-#          1   7739  35057
+#          0 120758  11372
+#          1   3971  32972
 # Precisión/Recall 
 precisionLRClassi2 <- posPredValue(as.factor(predictionLRClassi2), testClassification$ArrDel15, positive="1")
 recallLRClassi2 <- sensitivity(as.factor(predictionLRClassi2), testClassification$ArrDel15, positive="1")
 c(precisionLRClassi2,recallLRClassi2)
-# [1] 0.8191653 0.7905692
-# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 79%
+# [1] 0.8925101 0.7435504
+# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 74%
 name <- "LogisticRegressionClassificationModel2"
 df <- data.frame(name,precisionLRClassi2,recallLRClassi2)
 colnames(df) <- c("Model","Precision","Recall")
 metricsPreRec <- rbind(metricsPreRec,df)
 
 ##### 3.6.3.2. Random Forest #####
-modRFClassi2 <- randomForest(ArrDel15~DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
-                               DepTimeBlk, data = trainClassification, ntree=25)
+modRFClassi2 <- randomForest(ArrDel15~DayofMonth+FlightNum+UniqueCarrier+TailNum+DepDelay+DayOfWeek+OriginState+
+                               DepTime+DestAirportSeqID+DistanceGroup, data = trainClassification, ntree=25)
 # Predicción
 predictionRFClassi2 <- predict(modRFClassi2, newdata = testClassification)
 # Matriz de confusión
 confusionMatrix(data = as.factor(predictionRFClassi2), reference = testClassification$ArrDel15)
 #           Reference
 # Prediction     0     1
-#          0 117093   9324
-#          1   7636  35020
+#          0 120890  11112
+#          1   3839  33232
 # Precisión/Recall 
 precisionRFClassi2 <- posPredValue(as.factor(predictionRFClassi2), testClassification$ArrDel15, positive="1")
 recallRFClassi2 <- sensitivity(as.factor(predictionRFClassi2), testClassification$ArrDel15, positive="1")
 c(precisionRFClassi2,recallRFClassi2)
-# [1] 0.8209865 0.7897348
-# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 78%
+# [1] 0.8964420 0.7494137
+# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso casi el 75%
 name <- "RandomForestClassificationModel2"
 df <- data.frame(name,precisionRFClassi2,recallRFClassi2)
 colnames(df) <- c("Model","Precision","Recall")
 metricsPreRec <- rbind(metricsPreRec,df)
-# Conclusión: Para las características del Modelo 1, la predicción de Regresión Logística es 0,7% mejor.
+# Conclusión: Para las características del Modelo 1, la predicción de Random Forest es 0,5% mejor.
 
 
 ##### 3.6.4. Modelo 3 #####
 
-# ClassificationModel3: DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+Dest+
-#                       Origin 
+# ClassificationModel3: DepDelayMinutes+TailNum+DepTime+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
+#                       Origin+DestAirportSeqID 
 
 ##### 3.6.4.1. Regresión Logística #####
-modLRClassi3 <- glm(ArrDel15~DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
-                      Dest+Origin, family=binomial(link='logit'), data = trainClassification)
+modLRClassi3 <- glm(ArrDel15~DepDelayMinutes+TailNum+DepTime+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
+                      Origin+DestAirportSeqID, family=binomial(link='logit'), data = trainClassification)
 summary(modLRClassi3)
 # Predicción
 predictionLRClassi3 <- round(predict(modLRClassi3, newdata = testClassification, type = "response"))
@@ -574,34 +526,34 @@ predictionLRClassi3 <- round(predict(modLRClassi3, newdata = testClassification,
 confusionMatrix(data = as.factor(predictionLRClassi3), reference = testClassification$ArrDel15)
 #           Reference
 # Prediction     0     1
-#          0 120822  11372
-#          1   3907  32972
+#          0 120851  11456
+#          1   3878  32888
 # Precisión/Recall 
 precisionLRClassi3 <- posPredValue(as.factor(predictionLRClassi3), testClassification$ArrDel15, positive="1")
 recallLRClassi3 <- sensitivity(as.factor(predictionLRClassi3), testClassification$ArrDel15, positive="1")
 c(precisionLRClassi3,recallLRClassi3)
-# [1] 0.8940589 0.7435504
+# [1] 0.8945221 0.7416561
 name <- "LogisticRegressionClassificationModel3"
 df <- data.frame(name,precisionLRClassi3,recallLRClassi3)
 colnames(df) <- c("Model","Precision","Recall")
 metricsPreRec <- rbind(metricsPreRec,df)
 
 ##### 3.6.4.2. Random Forest #####
-modRFClassi3 <- randomForest(ArrDel15~DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
-                               Dest+Origin, data = trainClassification, ntree=25)
+modRFClassi3 <- randomForest(ArrDel15~DepDelayMinutes+TailNum+DepTime+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
+                               Origin+DestAirportSeqID, data = trainClassification, ntree=25)
 # Predicción
 predictionRFClassi3 <- predict(modRFClassi3, newdata = testClassification)
 # Matriz de confusión
 confusionMatrix(data = as.factor(predictionRFClassi3), reference = testClassification$ArrDel15)
 #           Reference
 # Prediction     0     1
-#          0 120784  11305
-#          1   3945  33039
+#          0 120883  11301
+#          1   3846  33043
 # Precisión/Recall 
 precisionRFClassi3 <- posPredValue(as.factor(predictionRFClassi3), testClassification$ArrDel15, positive="1")
 recallRFClassi3 <- sensitivity(as.factor(predictionRFClassi3), testClassification$ArrDel15, positive="1")
 c(precisionRFClassi3,recallRFClassi3)
-# [1] 0.8933323 0.7450613
+# [1] 0.8957413 0.7451515
 name <- "RandomForestClassificationModel3"
 df <- data.frame(name,precisionRFClassi3,recallRFClassi3)
 colnames(df) <- c("Model","Precision","Recall")
@@ -610,15 +562,20 @@ metricsPreRec <- rbind(metricsPreRec,df)
 # Resultados de las métricas
 metricsPreRec
 
-# El mejor precision/recall lo tiene la Regresión Logística y Random Forest del modelo 2, que de todos los vuelos 
-# que tienen retraso, se clasifican correctamente como retraso el 79% de los vuelos.
-varImp(modLRClassi2)
-# Conclusión: Las características que más influyen en la predicción son: 
-#             - El retraso del vuelo de salida.
-#             - El día del mes.
-#             - El estado del aeropuerto de Origen.
-#             - El número de vuelo.
-#             - La aeronave.
+# El mejor precision/recall lo tiene la Random Forest del modelo 2, que de todos los vuelos 
+# que tienen retraso, se clasifican correctamente como retraso casi el 75% de los vuelos.
+importance(modRFClassi2)
+# Conclusión: Las características que más influyen en la predicción en orden ascendente son: 
+#             - El retraso de salida del vuelo (DepDelay).
+#             - La hora de salida del vuelo (DepTime).
+#             - La matrícula del vuelo (TailNum).
+#             - El número de vuelo (FlightNum).
+#             - El día del mes (DayofMonth).
+#             - El aeropuerto de destino (DestAirportSeqID)
+#             - El estado de origen (OriginState)
+#             - El día de la semana (DayOfWeek)
+#             - La distancia (DistanceGroup)
+#             - La compañía (UniqueCarrier)
 # *************************************************************************************************
 
 
