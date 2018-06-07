@@ -17,11 +17,6 @@ if(!require("randomForest")){
   install.packages("randomForest")
   library(randomForest)
 }
-# rescale
-if(!require("scales")){
-  install.packages("scales")
-  library(scales)
-}
 # *************************************************************************************************
 
 
