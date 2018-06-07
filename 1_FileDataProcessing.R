@@ -1,4 +1,4 @@
-#### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
+ge#### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
 
 
@@ -36,8 +36,8 @@ if(!require("lubridate")){
 ##### 1.2. Bloque de carga de datos #####
 # ¡CUIDADO! Es necesario modificar la ruta por la correspondiente en el equipo donde se vaya a 
 # ejecutar el código para su correcto funcionamiento
-# Selección de ruta donde están los ficheros, en mi caso: "/Users/ellorentesj/repostGitHub/TFM/data/"
-setwd("/Users/ellorentesj/repostGitHub/TFM/")
+# Selección de ruta donde están los ficheros, en mi caso: "/Users/ellorentesj/repostGitHub/TFM"
+setwd("/Users/ellorentesj/repostGitHub/TFM")
 
 # Declaro variables 'tempDec' y 'tempJan' como archivos temporeales
 tempJan <- tempfile()
