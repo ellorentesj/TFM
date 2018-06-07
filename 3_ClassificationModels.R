@@ -18,6 +18,10 @@ if(!require("randomForest")){
   install.packages("randomForest")
   library(randomForest)
 }
+if(!require("dplyr")){
+  install.packages("dplyr")
+  library(dplyr)
+}
 # *************************************************************************************************
 
 
@@ -242,305 +246,16 @@ flights$SecurityDelay <- inner_join(flights, SecurityDelayWeights, by = "Securit
 # Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDel15 = 1)
 LateAircraftDelayWeights <- flights %>% group_by(LateAircraftDelay) %>% summarise(LateAircraftDelayW = mean(ArrDel15==1))
 # Realizo un join en la columna LateAircraftDelay del dataset flights con los pesos calculados en LateAircraftDelayWeights
-flights$LateAircraftDelay <- inner_join(flights, LateAircraftDelayWeights, by = "LateAircraftDelay")$SLateAircraftDelayW
+flights$LateAircraftDelay <- inner_join(flights, LateAircraftDelayWeights, by = "LateAircraftDelay")$LateAircraftDelayW
 # *************************************************************************************************
 
 
 
 # *************************************************************************************************
-#### 2.3. Guardo el dataframe normalizado ####
+#### 3.3. Guardo el dataframe normalizado ####
 # Guardo el dataset totalmente normalizado
 flightsWeights <- flights
 write.table(flightsWeights, file = "data/flightsWeightsClassi.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-# *************************************************************************************************
-
-
-
-# *************************************************************************************************
-##### 3.3. Bloque de modelización #####
-
-
-# Predicción si un vuelo puede o no llegar con retraso #
-# He escogido para este problema de clasificación, los algoritmos de Regresión Logística y Random Forest
-
-
-##### 3.3.1. Modelo completo ####
-
-
-# Establezco la semilla para que la misma muestra pueda reproducirse también en el futuro
-set.seed(7) 
-# Selecciono el 80% de los datos como muestra del total de las filas de los datos  
-sampleClassification <- sample.int(n = nrow(flightsWeights), size = floor(.80*nrow(flightsWeights)), replace = F)
-trainClassification <- flightsWeights[sampleClassification, ] # Conjunto de entrenamiento
-testClassification  <- flightsWeights[-sampleClassification, ] # Conjunto de test
-
-# Análisis de variables que influyen en qué un vuelo se retrase o no:
-# Según se ha observado en el análisis de las gráficas en Tableau, en un primer vistazo, parece que
-# las variables que más influyen en el que un vuelo esté o no retrasado son:
-# * DepDelay/DepDelayMinutes
-# * UniqueCarrier
-# * Origin & Dest
-# * Distance
-# * DayOfWeek
-# * DayofMonth
-# * TailNum
-# * DepTimeBlk/DepTime
-# Voy a comprobar si esto es así y si hay más variables que influyen en que un vuelo se retrase o no.
-
-# Para la realización del modelo completo, la finalidad es ver, que características del modelo tienen
-# más importancia.
-
-
-##### 3.3.1.1. Regresión Logística #####
-
-# Realizo un modelo con todas las características con Regresión Logística, para visualizar las
-# características que más influyen en el modelo:
-modLRClassiComplete = glm(ArrDel15~., family=binomial(link='logit'), data = trainClassification)
-summary(modLRClassiComplete)
-# Voy a ver la importancia de cada característica en el modelo:
-varImpModLRClassiComplete <- varImp(modLRClassiComplete)
-overall <- as.double(varImpModLRClassiComplete$Overall)
-names <- rownames(varImpModLRClassiComplete)
-df <- data.frame(names)
-df$overall <- overall
-arrange(df, desc(df$overall))
-ggplot(df, aes(x = df$names, y = df$overall)) + geom_col(fill="blue") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(x = "Names", y = "Overall", title = "Importance of features using Logistic Regression")
-# Parece que la característica que más influye para que un vuelo se retrase o no según el modelo
-# de Regresión Logística es ArrDelay
-# Tiene sentido por que es justo la característica que contiene retraso en la llegada, por tanto, se 
-# debe de prescindir de las variables que dan el retraso de la llegada de alguna manera para la 
-# realización del modelo.
-
-##### 3.3.1.2. Random Forest #####
-# Comparo este resultado realizando un modelo de todas las características con Random Forest:
-modRFClassiComplete <- randomForest(ArrDel15~., data = trainClassification, ntree=25)
-# Importancia de las características:
-importanceModRFClassiComplete <- importance(modRFClassiComplete)
-meanDecreaseGini <- as.double(importanceModRFClassiComplete)
-names <- rownames(importanceModRFClassiComplete)
-df <- data.frame(names)
-df$meanDecreaseGini <- meanDecreaseGini
-arrange(df, desc(df$meanDecreaseGini))
-ggplot(df, aes(x = df$names, y = df$meanDecreaseGini)) + geom_col(fill="blue") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(x = "Names", y = "MeanDecreaseGini", title = "Importance of features using Random Forest")
-# Realizando un modelo Random Forest con todas las características, se visualizan mejor aquellas
-# que tienen más importancia en el modelo.
-# Por tanto, de momento lo que sí se puede indicar, es que para la realización del modelo es necesario
-# prescindir de:
-# * Las características que nos aportan información de si un vuelo se retrasa en la llegada: ArrDelay,
-#   ArrivalDelayGroups, ArrDelayMinutes, ArrTime, ActualElapsedTime y ArrTimeBlk.
-# * Las características que indican el grupo de retraso: CarrierDelay, LateAircraftDelay, NASDelay,
-#   WeatherDelay y SecurityDelay; puesto que ya existe un DepDelay y un DepDelayMinutes que nos indica
-#   si sale con retraso el vuelo...
-# Con esto, voy realizar de primeras un modelo con el resto de las características:
-# DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+DayofMonth+DestState+DepTime+
-# UniqueCarrier+DepTimeBlk+Distance+OriginState+FlightNum+Month+TailNum+Dest+DestAirportSeqID+
-# OriginAirportSeqID+Origin+DayOfWeek
-
-
-##### 3.3.2. Modelo 1 #####
-
-# ClassificationModel1: DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+
-#                       DayofMonth+DestState+DepTime+UniqueCarrier+DepTimeBlk+Distance+OriginState+
-#                       FlightNum+Month+TailNum+Dest+DestAirportSeqID+OriginAirportSeqID+Origin+DayOfWeek
-
-
-##### 3.3.2.1. Regresión Logística #####
-# Realizo el modelo de nuevo de Regresión Logística con todas las características seleccionadas
-modLRClassi1 <- glm(ArrDel15~DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+
-                      DayofMonth+DestState+DepTime+UniqueCarrier+DepTimeBlk+Distance+OriginState+
-                      FlightNum+Month+TailNum+Dest+DestAirportSeqID+OriginAirportSeqID+Origin+DayOfWeek, 
-                    family=binomial(link='logit'), data = trainClassification)
-summary(modLRClassi1)
-# Del modelo se obtiene que ArrDel15 es significativo a más del 99,9% junto con el resto de 
-# características a excepción de DestState, OriginAirportSeqID y Origin
-# Importancia de las características seleccionadas:
-varImpModLRClassi1 <- varImp(modLRClassi1)
-overall <- as.double(varImpModLRClassi1$Overall)
-names <- rownames(varImpModLRClassi1)
-df <- data.frame(names)
-df$overall <- overall
-arrange(df, desc(df$overall))
-ggplot(df, aes(x = df$names, y = df$overall)) + geom_col(fill="blue") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(x = "Names", y = "Overall", title = "Importance of features using Logistic Regression")
-# Para el Modelo 2 voy a usar: DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+
-#                              OriginState+DepTimeBlk+DepTime/+Dest
-# Predicción
-predictionLRClassi1 <- round(predict(modLRClassi1, newdata = testClassification, type = "response"))
-# Matriz de confusión
-confusionMatrix(data = as.factor(predictionLRClassi1), reference = testClassification$ArrDel15)
-#           Reference
-# Prediction      0      1
-#          0 121406  11917
-#          1   3323  32427
-# Precisión/Recall
-precisionLRClassi1 <- posPredValue(as.factor(predictionLRClassi1), testClassification$ArrDel15, positive="1")
-recallLRClassi1 <- sensitivity(as.factor(predictionLRClassi1), testClassification$ArrDel15, positive="1")
-c(precisionLRClassi1,recallLRClassi1)
-# [1] 0.9070490 0.7312601
-# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 73%.
-# Almaceno los valores para compararlos con el resto:
-name <- "LogisticRegresionClassificationModel1"
-metricsPreRec <- data.frame(name, precisionLRClassi1,recallLRClassi1)
-colnames(metricsPreRec) <- c("Model","Precision","Recall")
-
-##### 3.3.2.2. Random Forest #####
-# Realizo una primera vuelta del modelo utilizando Random Forest con ntree=25, 50 y 75 para detectar
-# y evitar el punto donde el modelo comience a realizar overfiting, para ntree=509 el modelo comienza
-# a predecir peor, se produce overfiting, ajusto el modelo con ntree=25
-modRFClassi1 <- randomForest(ArrDel15~DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+
-                               DayofMonth+DestState+DepTime+UniqueCarrier+DepTimeBlk+Distance+OriginState+
-                               FlightNum+Month+TailNum+Dest+DestAirportSeqID+OriginAirportSeqID+Origin+DayOfWeek, 
-                             data = trainClassification, ntree=25)
-# Importancia de las características seleccionadas:
-importanceModRFClassi1 <- importance(modRFClassi1)
-meanDecreaseGini <- as.double(importanceModRFClassi1)
-names <- rownames(importanceModRFClassi1)
-df <- data.frame(names)
-df$meanDecreaseGini <- meanDecreaseGini
-arrange(df, desc(df$meanDecreaseGini))
-ggplot(df, aes(x = df$names, y = df$meanDecreaseGini)) + geom_col(fill="blue") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(x = "Names", y = "MeanDecreaseGini", title = "Importance of features using Random Forest")
-# Para el Modelo 3 voy a usar: DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+Dest+
-#                              Origin
-predictionRFClassi1 <- predict(modRFClassi1, newdata = testClassification)
-# Matriz de confusión
-confusionMatrix(data = as.factor(predictionRFClassi1), reference = testClassification$ArrDel15)
-#           Reference
-# Prediction      0      1
-#          0 120774  11119
-#          1   3955  33225
-# Precisión/Recall 
-precisionRFClassi1 <- posPredValue(as.factor(predictionRFClassi1), testClassification$ArrDel15, positive="1")
-recallRFClassi1 <- sensitivity(as.factor(predictionRFClassi1), testClassification$ArrDel15, positive="1")
-c(precisionRFClassi1,recallRFClassi1)
-# [1] 0.8936256 0.7492558
-# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso casi el 75%.
-# Guardo los resultados en el metricsPreRec
-name <- "RandomForestClassificationModel1"
-df <- data.frame(name,precisionRFClassi1,recallRFClassi1)
-colnames(df) <- c("Model","Precision","Recall")
-metricsPreRec <- rbind(metricsPreRec,df)
-# Conclusión: Para las características del Modelo 1, la predicción de Random Forest es 1,7% mejor.
-
-
-##### 3.3.3. Modelo 2 #####
-
-# ClassificationModel2: DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
-#                       DepTimeBlk
-
-##### 3.3.3.1. Regresión Logística #####
-modLRClassi2 <- glm(ArrDel15~DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
-                      DepTimeBlk, family=binomial(link='logit'), data = trainClassification)
-summary(modLRClassi2)
-# Predicción
-predictionLRClassi2 <- round(predict(modLRClassi2, newdata = testClassification, type = "response"))
-# Matriz de confusión
-confusionMatrix(data = as.factor(predictionLRClassi2), reference = testClassification$ArrDel15)
-#           Reference
-# Prediction     0     1
-#          0 116990   9287
-#          1   7739  35057
-# Precisión/Recall 
-precisionLRClassi2 <- posPredValue(as.factor(predictionLRClassi2), testClassification$ArrDel15, positive="1")
-recallLRClassi2 <- sensitivity(as.factor(predictionLRClassi2), testClassification$ArrDel15, positive="1")
-c(precisionLRClassi2,recallLRClassi2)
-# [1] 0.8191653 0.7905692
-# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 79%
-name <- "LogisticRegresionClassificationModel2"
-df <- data.frame(name,precisionLRClassi2,recallLRClassi2)
-colnames(df) <- c("Model","Precision","Recall")
-metricsPreRec <- rbind(metricsPreRec,df)
-
-##### 3.3.3.2. Random Forest #####
-modRFClassi2 <- randomForest(ArrDel15~DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
-                               DepTimeBlk, data = trainClassification, ntree=25)
-# Predicción
-predictionRFClassi2 <- predict(modRFClassi2, newdata = testClassification)
-# Matriz de confusión
-confusionMatrix(data = as.factor(predictionRFClassi2), reference = testClassification$ArrDel15)
-#           Reference
-# Prediction     0     1
-#          0 117093   9324
-#          1   7636  35020
-# Precisión/Recall 
-precisionRFClassi2 <- posPredValue(as.factor(predictionRFClassi2), testClassification$ArrDel15, positive="1")
-recallRFClassi2 <- sensitivity(as.factor(predictionRFClassi2), testClassification$ArrDel15, positive="1")
-c(precisionRFClassi2,recallRFClassi2)
-# [1] 0.8209865 0.7897348
-# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 78%
-name <- "RandomForestClassificationModel2"
-df <- data.frame(name,precisionRFClassi2,recallRFClassi2)
-colnames(df) <- c("Model","Precision","Recall")
-metricsPreRec <- rbind(metricsPreRec,df)
-# Conclusión: Para las características del Modelo 1, la predicción de Regresión Logística es 0,7% mejor.
-
-
-##### 3.3.4. Modelo 3 #####
-
-# ClassificationModel3: DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+Dest+
-#                       Origin 
-
-##### 3.3.4.1. Regresión Logística #####
-modLRClassi3 <- glm(ArrDel15~DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
-                      Dest+Origin, family=binomial(link='logit'), data = trainClassification)
-summary(modLRClassi3)
-# Predicción
-predictionLRClassi3 <- round(predict(modLRClassi3, newdata = testClassification, type = "response"))
-# Matriz de confusión
-confusionMatrix(data = as.factor(predictionLRClassi3), reference = testClassification$ArrDel15)
-#           Reference
-# Prediction     0     1
-#          0 120822  11372
-#          1   3907  32972
-# Precisión/Recall 
-precisionLRClassi3 <- posPredValue(as.factor(predictionLRClassi3), testClassification$ArrDel15, positive="1")
-recallLRClassi3 <- sensitivity(as.factor(predictionLRClassi3), testClassification$ArrDel15, positive="1")
-c(precisionLRClassi3,recallLRClassi3)
-# [1] 0.8940589 0.7435504
-name <- "LogisticRegresionClassificationModel3"
-df <- data.frame(name,precisionLRClassi3,recallLRClassi3)
-colnames(df) <- c("Model","Precision","Recall")
-metricsPreRec <- rbind(metricsPreRec,df)
-
-##### 3.3.4.2. Random Forest #####
-modRFClassi3 <- randomForest(ArrDel15~DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
-                               Dest+Origin, data = trainClassification, ntree=25)
-# Predicción
-predictionRFClassi3 <- predict(modRFClassi3, newdata = testClassification)
-# Matriz de confusión
-confusionMatrix(data = as.factor(predictionRFClassi3), reference = testClassification$ArrDel15)
-#           Reference
-# Prediction     0     1
-#          0 120784  11305
-#          1   3945  33039
-# Precisión/Recall 
-precisionRFClassi3 <- posPredValue(as.factor(predictionRFClassi3), testClassification$ArrDel15, positive="1")
-recallRFClassi3 <- sensitivity(as.factor(predictionRFClassi3), testClassification$ArrDel15, positive="1")
-c(precisionRFClassi3,recallRFClassi3)
-# [1] 0.8933323 0.7450613
-name <- "RandomForestClassificationModel3"
-df <- data.frame(name,precisionRFClassi3,recallRFClassi3)
-colnames(df) <- c("Model","Precision","Recall")
-metricsPreRec <- rbind(metricsPreRec,df)
-
-# Resultados de las métricas
-metricsPreRec
-
-# El mejor precision/recall lo tiene la Regresión Logística y Random Forest del modelo 2, que de todos los vuelos 
-# que tienen retraso, se clasifican correctamente como retraso el 79% de los vuelos.
-varImp(modLRClassi2)
-# Conclusión: Las características que más influyen en la predicción son: 
-#             - El retraso del vuelo de salida.
-#             - El día del mes.
-#             - El estado del aeropuerto de Origen.
-#             - El número de vuelo.
-#             - La aeronave.
 # *************************************************************************************************
 
 
@@ -586,7 +301,7 @@ write.table(LateAircraftDelayWeights, file = "CategoriesWeights/LateAircraftDela
 
 
 # *************************************************************************************************
-#### 3.5. Elimino variables categóricas y asignaciones innecesarias ####
+#### 3.5. Elimino variables categóricas ####
 rm(ActualElapsedTimeWeights)
 rm(ArrDelayMinutesWeights)
 rm(ArrDelayWeights)
@@ -618,6 +333,298 @@ rm(SecurityDelayWeights)
 rm(TailNumWeights)
 rm(UniqueCarrierWeights)
 rm(WeatherDelayWeights)
+# *************************************************************************************************
+
+
+
+# *************************************************************************************************
+##### 3.6. Bloque de modelización #####
+
+
+# Predicción si un vuelo puede o no llegar con retraso #
+# He escogido para este problema de clasificación, los algoritmos de Regresión Logística y Random Forest
+
+
+##### 3.6.1. Modelo completo ####
+
+# Establezco la semilla para que la misma muestra pueda reproducirse también en el futuro
+set.seed(7) 
+# Selecciono el 80% de los datos como muestra del total de las filas de los datos  
+sampleClassification <- sample.int(n = nrow(flightsWeights), size = floor(.80*nrow(flightsWeights)), replace = F)
+trainClassification <- flightsWeights[sampleClassification, ] # Conjunto de entrenamiento
+testClassification  <- flightsWeights[-sampleClassification, ] # Conjunto de test
+
+# Análisis de variables que influyen en qué un vuelo se retrase o no:
+# Según se ha observado en el análisis de las gráficas en Tableau, en un primer vistazo, parece que
+# las variables que más influyen en el que un vuelo esté o no retrasado son:
+# * DepDelay/DepDelayMinutes
+# * UniqueCarrier
+# * Origin & Dest
+# * Distance
+# * DayOfWeek
+# * DayofMonth
+# * TailNum
+# * DepTimeBlk/DepTime
+# Voy a comprobar si esto es así y si hay más variables que influyen en que un vuelo se retrase o no.
+
+# Para la realización del modelo completo, la finalidad es ver, que características del modelo tienen
+# más importancia.
+
+##### 3.6.1.1. Regresión Logística #####
+
+# Realizo un modelo con todas las características con Regresión Logística, para visualizar las
+# características que más influyen en el modelo:
+modLRClassiComplete = glm(ArrDel15~., family=binomial(link='logit'), data = trainClassification)
+summary(modLRClassiComplete)
+# Voy a ver la importancia de cada característica en el modelo:
+varImpModLRClassiComplete <- varImp(modLRClassiComplete)
+overall <- as.double(varImpModLRClassiComplete$Overall)
+names <- rownames(varImpModLRClassiComplete)
+df <- data.frame(names)
+df$overall <- overall
+arrange(df, desc(df$overall))
+ggplot(df, aes(x = df$names, y = df$overall)) + geom_col(fill="blue") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = "Names", y = "Overall", title = "Importance of features using Logistic Regression")
+# Parece que la característica que más influye para que un vuelo se retrase o no según el modelo
+# de Regresión Logística es ArrDelay
+# Tiene sentido por que es justo la característica que contiene retraso en la llegada, por tanto, se 
+# debe de prescindir de las variables que dan el retraso de la llegada de alguna manera para la 
+# realización del modelo.
+
+##### 3.6.1.2. Random Forest #####
+# Comparo este resultado realizando un modelo de todas las características con Random Forest:
+modRFClassiComplete <- randomForest(ArrDel15~., data = trainClassification, ntree=25)
+# Importancia de las características:
+importanceModRFClassiComplete <- importance(modRFClassiComplete)
+meanDecreaseGini <- as.double(importanceModRFClassiComplete)
+names <- rownames(importanceModRFClassiComplete)
+df <- data.frame(names)
+df$meanDecreaseGini <- meanDecreaseGini
+arrange(df, desc(df$meanDecreaseGini))
+ggplot(df, aes(x = df$names, y = df$meanDecreaseGini)) + geom_col(fill="blue") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = "Names", y = "MeanDecreaseGini", title = "Importance of features using Random Forest")
+# Realizando un modelo Random Forest con todas las características, se visualizan mejor aquellas
+# que tienen más importancia en el modelo.
+# Por tanto, de momento lo que sí se puede indicar, es que para la realización del modelo es necesario
+# prescindir de:
+# * Las características que nos aportan información de si un vuelo se retrasa en la llegada: ArrDelay,
+#   ArrivalDelayGroups, ArrDelayMinutes, ArrTime, ActualElapsedTime y ArrTimeBlk.
+# * Las características que indican el grupo de retraso: CarrierDelay, LateAircraftDelay, NASDelay,
+#   WeatherDelay y SecurityDelay; puesto que ya existe un DepDelay y un DepDelayMinutes que nos indica
+#   si sale con retraso el vuelo...
+# Con esto, voy realizar de primeras un modelo con el resto de las características:
+# DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+DayofMonth+DestState+DepTime+
+# UniqueCarrier+DepTimeBlk+Distance+OriginState+FlightNum+Month+TailNum+Dest+DestAirportSeqID+
+# OriginAirportSeqID+Origin+DayOfWeek
+
+
+##### 3.6.2. Modelo 1 #####
+
+# ClassificationModel1: DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+
+#                       DayofMonth+DestState+DepTime+UniqueCarrier+DepTimeBlk+Distance+OriginState+
+#                       FlightNum+Month+TailNum+Dest+DestAirportSeqID+OriginAirportSeqID+Origin+DayOfWeek
+
+##### 3.6.2.1. Regresión Logística #####
+# Realizo el modelo de nuevo de Regresión Logística con todas las características seleccionadas
+modLRClassi1 <- glm(ArrDel15~DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+
+                      DayofMonth+DestState+DepTime+UniqueCarrier+DepTimeBlk+Distance+OriginState+
+                      FlightNum+Month+TailNum+Dest+DestAirportSeqID+OriginAirportSeqID+Origin+DayOfWeek, 
+                    family=binomial(link='logit'), data = trainClassification)
+summary(modLRClassi1)
+# Del modelo se obtiene que ArrDel15 es significativo a más del 99,9% junto con el resto de 
+# características a excepción de DestState, OriginAirportSeqID y Origin
+# Importancia de las características seleccionadas:
+varImpModLRClassi1 <- varImp(modLRClassi1)
+overall <- as.double(varImpModLRClassi1$Overall)
+names <- rownames(varImpModLRClassi1)
+df <- data.frame(names)
+df$overall <- overall
+arrange(df, desc(df$overall))
+ggplot(df, aes(x = df$names, y = df$overall)) + geom_col(fill="blue") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = "Names", y = "Overall", title = "Importance of features using Logistic Regression")
+# Para el Modelo 2 voy a usar: DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+
+#                              OriginState+DepTimeBlk+DepTime/+Dest
+# Predicción
+predictionLRClassi1 <- round(predict(modLRClassi1, newdata = testClassification, type = "response"))
+# Matriz de confusión
+confusionMatrix(data = as.factor(predictionLRClassi1), reference = testClassification$ArrDel15)
+#           Reference
+# Prediction      0      1
+#          0 121406  11917
+#          1   3323  32427
+# Precisión/Recall
+precisionLRClassi1 <- posPredValue(as.factor(predictionLRClassi1), testClassification$ArrDel15, positive="1")
+recallLRClassi1 <- sensitivity(as.factor(predictionLRClassi1), testClassification$ArrDel15, positive="1")
+c(precisionLRClassi1,recallLRClassi1)
+# [1] 0.9070490 0.7312601
+# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 73%.
+# Almaceno los valores para compararlos con el resto:
+name <- "LogisticRegressionClassificationModel1"
+metricsPreRec <- data.frame(name, precisionLRClassi1,recallLRClassi1)
+colnames(metricsPreRec) <- c("Model","Precision","Recall")
+
+##### 3.6.2.2. Random Forest #####
+# Realizo una primera vuelta del modelo utilizando Random Forest con ntree=25, 50 y 75 para detectar
+# y evitar el punto donde el modelo comience a realizar overfiting, para ntree=509 el modelo comienza
+# a predecir peor, se produce overfiting, ajusto el modelo con ntree=25
+modRFClassi1 <- randomForest(ArrDel15~DepDel15+DepartureDelayGroups+DepDelayMinutes+DepDelay+DistanceGroup+
+                               DayofMonth+DestState+DepTime+UniqueCarrier+DepTimeBlk+Distance+OriginState+
+                               FlightNum+Month+TailNum+Dest+DestAirportSeqID+OriginAirportSeqID+Origin+DayOfWeek, 
+                             data = trainClassification, ntree=25)
+# Importancia de las características seleccionadas:
+importanceModRFClassi1 <- importance(modRFClassi1)
+meanDecreaseGini <- as.double(importanceModRFClassi1)
+names <- rownames(importanceModRFClassi1)
+df <- data.frame(names)
+df$meanDecreaseGini <- meanDecreaseGini
+arrange(df, desc(df$meanDecreaseGini))
+ggplot(df, aes(x = df$names, y = df$meanDecreaseGini)) + geom_col(fill="blue") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = "Names", y = "MeanDecreaseGini", title = "Importance of features using Random Forest")
+# Para el Modelo 3 voy a usar: DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+Dest+
+#                              Origin
+predictionRFClassi1 <- predict(modRFClassi1, newdata = testClassification)
+# Matriz de confusión
+confusionMatrix(data = as.factor(predictionRFClassi1), reference = testClassification$ArrDel15)
+#           Reference
+# Prediction      0      1
+#          0 120774  11119
+#          1   3955  33225
+# Precisión/Recall 
+precisionRFClassi1 <- posPredValue(as.factor(predictionRFClassi1), testClassification$ArrDel15, positive="1")
+recallRFClassi1 <- sensitivity(as.factor(predictionRFClassi1), testClassification$ArrDel15, positive="1")
+c(precisionRFClassi1,recallRFClassi1)
+# [1] 0.8936256 0.7492558
+# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso casi el 75%.
+# Guardo los resultados en el metricsPreRec
+name <- "RandomForestClassificationModel1"
+df <- data.frame(name,precisionRFClassi1,recallRFClassi1)
+colnames(df) <- c("Model","Precision","Recall")
+metricsPreRec <- rbind(metricsPreRec,df)
+# Conclusión: Para las características del Modelo 1, la predicción de Random Forest es 1,7% mejor.
+
+
+##### 3.6.3. Modelo 2 #####
+
+# ClassificationModel2: DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
+#                       DepTimeBlk
+
+##### 3.6.3.1. Regresión Logística #####
+modLRClassi2 <- glm(ArrDel15~DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
+                      DepTimeBlk, family=binomial(link='logit'), data = trainClassification)
+summary(modLRClassi2)
+# Predicción
+predictionLRClassi2 <- round(predict(modLRClassi2, newdata = testClassification, type = "response"))
+# Matriz de confusión
+confusionMatrix(data = as.factor(predictionLRClassi2), reference = testClassification$ArrDel15)
+#           Reference
+# Prediction     0     1
+#          0 116990   9287
+#          1   7739  35057
+# Precisión/Recall 
+precisionLRClassi2 <- posPredValue(as.factor(predictionLRClassi2), testClassification$ArrDel15, positive="1")
+recallLRClassi2 <- sensitivity(as.factor(predictionLRClassi2), testClassification$ArrDel15, positive="1")
+c(precisionLRClassi2,recallLRClassi2)
+# [1] 0.8191653 0.7905692
+# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 79%
+name <- "LogisticRegressionClassificationModel2"
+df <- data.frame(name,precisionLRClassi2,recallLRClassi2)
+colnames(df) <- c("Model","Precision","Recall")
+metricsPreRec <- rbind(metricsPreRec,df)
+
+##### 3.6.3.2. Random Forest #####
+modRFClassi2 <- randomForest(ArrDel15~DayofMonth+DepDel15+FlightNum+UniqueCarrier+TailNum+DayOfWeek+OriginState+
+                               DepTimeBlk, data = trainClassification, ntree=25)
+# Predicción
+predictionRFClassi2 <- predict(modRFClassi2, newdata = testClassification)
+# Matriz de confusión
+confusionMatrix(data = as.factor(predictionRFClassi2), reference = testClassification$ArrDel15)
+#           Reference
+# Prediction     0     1
+#          0 117093   9324
+#          1   7636  35020
+# Precisión/Recall 
+precisionRFClassi2 <- posPredValue(as.factor(predictionRFClassi2), testClassification$ArrDel15, positive="1")
+recallRFClassi2 <- sensitivity(as.factor(predictionRFClassi2), testClassification$ArrDel15, positive="1")
+c(precisionRFClassi2,recallRFClassi2)
+# [1] 0.8209865 0.7897348
+# Conclusión: De todos los vuelos que tienen retraso, se clasifican correctamente como retraso el 78%
+name <- "RandomForestClassificationModel2"
+df <- data.frame(name,precisionRFClassi2,recallRFClassi2)
+colnames(df) <- c("Model","Precision","Recall")
+metricsPreRec <- rbind(metricsPreRec,df)
+# Conclusión: Para las características del Modelo 1, la predicción de Regresión Logística es 0,7% mejor.
+
+
+##### 3.6.4. Modelo 3 #####
+
+# ClassificationModel3: DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+Dest+
+#                       Origin 
+
+##### 3.6.4.1. Regresión Logística #####
+modLRClassi3 <- glm(ArrDel15~DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
+                      Dest+Origin, family=binomial(link='logit'), data = trainClassification)
+summary(modLRClassi3)
+# Predicción
+predictionLRClassi3 <- round(predict(modLRClassi3, newdata = testClassification, type = "response"))
+# Matriz de confusión
+confusionMatrix(data = as.factor(predictionLRClassi3), reference = testClassification$ArrDel15)
+#           Reference
+# Prediction     0     1
+#          0 120822  11372
+#          1   3907  32972
+# Precisión/Recall 
+precisionLRClassi3 <- posPredValue(as.factor(predictionLRClassi3), testClassification$ArrDel15, positive="1")
+recallLRClassi3 <- sensitivity(as.factor(predictionLRClassi3), testClassification$ArrDel15, positive="1")
+c(precisionLRClassi3,recallLRClassi3)
+# [1] 0.8940589 0.7435504
+name <- "LogisticRegressionClassificationModel3"
+df <- data.frame(name,precisionLRClassi3,recallLRClassi3)
+colnames(df) <- c("Model","Precision","Recall")
+metricsPreRec <- rbind(metricsPreRec,df)
+
+##### 3.6.4.2. Random Forest #####
+modRFClassi3 <- randomForest(ArrDel15~DepDelayMinutes+TailNum+FlightNum+DepTime+DayofMonth+Distance+DayOfWeek+
+                               Dest+Origin, data = trainClassification, ntree=25)
+# Predicción
+predictionRFClassi3 <- predict(modRFClassi3, newdata = testClassification)
+# Matriz de confusión
+confusionMatrix(data = as.factor(predictionRFClassi3), reference = testClassification$ArrDel15)
+#           Reference
+# Prediction     0     1
+#          0 120784  11305
+#          1   3945  33039
+# Precisión/Recall 
+precisionRFClassi3 <- posPredValue(as.factor(predictionRFClassi3), testClassification$ArrDel15, positive="1")
+recallRFClassi3 <- sensitivity(as.factor(predictionRFClassi3), testClassification$ArrDel15, positive="1")
+c(precisionRFClassi3,recallRFClassi3)
+# [1] 0.8933323 0.7450613
+name <- "RandomForestClassificationModel3"
+df <- data.frame(name,precisionRFClassi3,recallRFClassi3)
+colnames(df) <- c("Model","Precision","Recall")
+metricsPreRec <- rbind(metricsPreRec,df)
+
+# Resultados de las métricas
+metricsPreRec
+
+# El mejor precision/recall lo tiene la Regresión Logística y Random Forest del modelo 2, que de todos los vuelos 
+# que tienen retraso, se clasifican correctamente como retraso el 79% de los vuelos.
+varImp(modLRClassi2)
+# Conclusión: Las características que más influyen en la predicción son: 
+#             - El retraso del vuelo de salida.
+#             - El día del mes.
+#             - El estado del aeropuerto de Origen.
+#             - El número de vuelo.
+#             - La aeronave.
+# *************************************************************************************************
+
+
+
+# *************************************************************************************************
+#### 3.7. Elimino asignaciones innecesarias ####
 rm(df)
 rm(name)
 rm(names)
@@ -625,13 +632,5 @@ rm(overall)
 rm(meanDecreaseGini)
 # *************************************************************************************************
 
-
-
-# *************************************************************************************************
-#### 3.6. Guardo el dataframe resultante de la normalización ####
-# Guardo el dataset totalmente normalizado
-flightsWeights <- flights
-write.table(flightsWeights, file = "data/flightsWeights.csv", append = FALSE, sep = ",", eol = "\n", row.names = FALSE, na = "", col.names = TRUE)
-# *************************************************************************************************
 
 
