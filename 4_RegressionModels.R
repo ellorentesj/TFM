@@ -245,7 +245,7 @@ flightsDelay$ArrDelay <- inner_join(flightsDelay, ArrDelayWeightsR, by = "ArrDel
 # Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDelayMinutes)
 ArrivalDelayGroupsWeightsR <- flightsDelay %>% group_by(ArrivalDelayGroups) %>% summarise(ArrivalDelayGroupsW = mean(ArrDelayMinutes))
 # Normalizo los pesos
-ArrivalDelayGroupsWeightsR$NRM <- rescale(ArrivalDelayGroupsWeightsR$rrivalDelayGroupsW)
+ArrivalDelayGroupsWeightsR$NRM <- rescale(ArrivalDelayGroupsWeightsR$ArrivalDelayGroupsW)
 # Realizo un join en la columna ArrivalDelayGroups del dataset flightsDelay con los pesos calculados en ArrivalDelayGroupsWeightsR
 flightsDelay$ArrivalDelayGroups <- inner_join(flightsDelay, ArrivalDelayGroupsWeightsR, by = "ArrivalDelayGroups")$NRM
 
