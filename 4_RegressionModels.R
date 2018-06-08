@@ -245,7 +245,7 @@ flightsDelay$ArrDelay <- inner_join(flightsDelay, ArrDelayWeightsR, by = "ArrDel
 # Calculo la media de los pesos de cada valor en función de los vuelos retrasados (ArrDelayMinutes)
 ArrivalDelayGroupsWeightsR <- flightsDelay %>% group_by(ArrivalDelayGroups) %>% summarise(ArrivalDelayGroupsW = mean(ArrDelayMinutes))
 # Normalizo los pesos
-ArrivalDelayGroupsWeightsR$NRM <- rescale(ArrivalDelayGroupsR$ArrivalDelayGroupsWeightsW)
+ArrivalDelayGroupsWeightsR$NRM <- rescale(ArrivalDelayGroupsWeightsR$rrivalDelayGroupsW)
 # Realizo un join en la columna ArrivalDelayGroups del dataset flightsDelay con los pesos calculados en ArrivalDelayGroupsWeightsR
 flightsDelay$ArrivalDelayGroups <- inner_join(flightsDelay, ArrivalDelayGroupsWeightsR, by = "ArrivalDelayGroups")$NRM
 
@@ -457,16 +457,6 @@ summary(modLRRegres)
 # Parece que las variables más correlacionadas son: DepDel15, DepDelay, DistanceGroup, DayofMonth, 
 # DestState, DepTime, UniqueCarrier, DepTimeBlk, Distance, OriginState, FlightNum, Month, TailNum, 
 # Dest, DestAirportSeqID, DayOfWeek.
-# Voy a ver la importancia de cada característica en el modelo:
-varImpModLRRegres <- varImp(modLRRegres)
-overall <- as.double(varImpModLRRegres$Overall)
-names <- rownames(varImpModLRRegres)
-df <- data.frame(names)
-df$overall <- overall
-arrange(df, desc(df$overall))
-ggplot(df, aes(x = df$names, y = df$overall)) + geom_col(fill="blue") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(x = "Names", y = "Overall", title = "Importance of features using Linear Regression")
 # Predicción
 predictionLRRegres <- predict.lm(modLRRegres,testRegression)
 # Real
@@ -491,16 +481,6 @@ modRFRegres <- randomForest(ArrDelayMinutes~DepDel15+DepartureDelayGroups+DepDel
                                DistanceGroup+DayofMonth+DestState+DepTime+UniqueCarrier+DepTimeBlk+
                                Distance+OriginState+FlightNum+Month+TailNum+Dest+DestAirportSeqID+
                                OriginAirportSeqID+Origin+DayOfWeek, data = trainRegression, ntree=25)
-# Importancia de las características:
-importanceModRFRegres <- importance(modRFRegres)
-meanDecreaseGini <- as.double(importanceModRFRegres)
-names <- rownames(importanceModRFRegres)
-df <- data.frame(names)
-df$meanDecreaseGini <- meanDecreaseGini
-arrange(df, desc(df$meanDecreaseGini))
-ggplot(df, aes(x = df$names, y = df$meanDecreaseGini)) + geom_col(fill="blue") + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(x = "Names", y = "MeanDecreaseGini", title = "Importance of features using Random Forest")
 # Predicción
 predictionRFRegres <- predict(modRFRegres,testRegression)
 # MAPE
