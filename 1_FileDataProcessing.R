@@ -1,4 +1,4 @@
-ge#### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
+#### TFM: ANÁLISIS Y PREDICCIÓN DEL RESTRASO EN LOS VUELOS ####
 
 
 
@@ -37,7 +37,7 @@ if(!require("lubridate")){
 # ¡CUIDADO! Es necesario modificar la ruta por la correspondiente en el equipo donde se vaya a 
 # ejecutar el código para su correcto funcionamiento
 # Selección de ruta donde están los ficheros, en mi caso: "/Users/ellorentesj/repostGitHub/TFM"
-setwd("/Users/ellorentesj/repostGitHub/TFM")
+# setwd("/Users/ellorentesj/repostGitHub/TFM")
 
 # Declaro variables 'tempDec' y 'tempJan' como archivos temporeales
 tempJan <- tempfile()
@@ -52,8 +52,8 @@ unzip(tempJan,"On_Time_On_Time_Performance_2014_1.csv")
 unzip(tempFeb, "On_Time_On_Time_Performance_2014_2.csv")
 
 # Introduzco los datos de los CSV en dataframes
-dfJanuary <- fread("data/On_Time_On_Time_Performance_2014_1.csv", header=T, sep=',')
-dfFebruary <- fread("data/On_Time_On_Time_Performance_2014_2.csv", header=T, sep=',')
+dfJanuary <- fread("On_Time_On_Time_Performance_2014_1.csv", header=T, sep=',')
+dfFebruary <- fread("On_Time_On_Time_Performance_2014_2.csv", header=T, sep=',')
 
 flightsAux <- rbind(dfJanuary,dfFebruary)
 # *************************************************************************************************
